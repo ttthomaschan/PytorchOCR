@@ -60,8 +60,8 @@ class DetInfer:
 def init_args():
     import argparse
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    parser.add_argument('--model_path', required=True, type=str, help='rec model path')
-    parser.add_argument('--img_path', required=True, type=str, help='img path for predict')
+    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test/idcard.jpg')
     args = parser.parse_args()
     return args
 
@@ -77,5 +77,6 @@ if __name__ == '__main__':
     box_list, score_list = model.predict(img, is_output_polygon=False)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = draw_bbox(img, box_list)
-    plt.imshow(img)
-    plt.show()
+    cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test/idcard_result.jpg',img)
+    #plt.imshow(img)
+    #plt.show()
