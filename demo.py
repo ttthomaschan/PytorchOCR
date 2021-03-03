@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2020/6/16 10:57
-# @Author  : zhoujun
 import os
+from PIL import Image
+
 import sys
 import pathlib
 
@@ -16,6 +15,11 @@ from torchvision import transforms
 from torchocr.networks import build_model
 from torchocr.datasets.det_modules import ResizeShortSize,ResizeFixedSize
 from torchocr.postprocess import build_post_process
+
+import cv2
+from matplotlib import pyplot as plt
+from torchocr.utils import draw_ocr_box_txt, draw_bbox
+import argparse
 
 
 class DetInfer:
@@ -56,27 +60,23 @@ class DetInfer:
             box_list, score_list = [], []
         return box_list, score_list
 
-
-def init_args():
-    import argparse
+if __name__ == '__main__':
+    
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
     parser.add_argument('--model_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/idcard.jpg')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
     args = parser.parse_args()
-    return args
-
-
-if __name__ == '__main__':
-    import cv2
-    from matplotlib import pyplot as plt
-    from torchocr.utils import draw_ocr_box_txt, draw_bbox
-
-    args = init_args()
     img = cv2.imread(args.img_path)
     model = DetInfer(args.model_path)
     box_list, score_list = model.predict(img, is_output_polygon=False)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = draw_bbox(img, box_list)
-    cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_images/idcard_result.jpg',img)
-    #plt.imshow(img)
-    #plt.show()
+    cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_images/mt03_result.jpg',img)
+
+    '''
+    to do:
+    1)写一个crop boxes函数
+    2)
+    '''
+    model = RecInfer(args.model_path)
+    out = model.predict(img)
