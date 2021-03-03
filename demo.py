@@ -16,6 +16,9 @@ from torchocr.networks import build_model
 from torchocr.datasets.det_modules import ResizeShortSize,ResizeFixedSize
 from torchocr.postprocess import build_post_process
 
+from torchocr.datasets.RecDataSet import RecDataProcess
+from torchocr.utils import CTCLabelConverter
+
 import cv2
 from matplotlib import pyplot as plt
 from torchocr.utils import draw_ocr_box_txt, draw_bbox
@@ -60,23 +63,73 @@ class DetInfer:
             box_list, score_list = [], []
         return box_list, score_list
 
+
+class RecInfer:
+    def __init__(self, model_path):
+        ckpt = torch.load(model_path, map_location='cpu')
+        cfg = ckpt['cfg']
+        self.model = build_model(cfg['model'])
+        state_dict = {}
+        for k, v in ckpt['state_dict'].items():
+            state_dict[k.replace('module.', '')] = v
+        self.model.load_state_dict(state_dict)
+
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.model.to(self.device)
+        self.model.eval()
+
+        self.process = RecDataProcess(cfg['dataset']['train']['dataset'])
+        self.converter = CTCLabelConverter(cfg['dataset']['alphabet'])
+
+    def predict(self, img):
+        # 预处理根据训练来
+        img = self.process.resize_with_specific_height(img)
+        # img = self.process.width_pad_img(img, 120)
+        img = self.process.normalize_img(img)
+        tensor = torch.from_numpy(img.transpose([2, 0, 1])).float()
+        tensor = tensor.unsqueeze(dim=0)
+        tensor = tensor.to(self.device)
+        out = self.model(tensor)
+        txt = self.converter.decode(out.softmax(dim=2).detach().cpu().numpy())
+        return txt
+
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
+    parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt02.png')
     args = parser.parse_args()
+    
     img = cv2.imread(args.img_path)
-    model = DetInfer(args.model_path)
-    box_list, score_list = model.predict(img, is_output_polygon=False)
+    img_bak = img.copy()
+    modeldet = DetInfer(args.modeldet_path)
+    box_list, score_list = modeldet.predict(img, is_output_polygon=False)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = draw_bbox(img, box_list)
-    cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_images/mt03_result.jpg',img)
 
-    '''
-    to do:
-    1)写一个crop boxes函数
-    2)
-    '''
-    model = RecInfer(args.model_path)
-    out = model.predict(img)
+    imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_images/'
+    imageres_name = 'mt02_result.jpg'
+    cv2.imwrite(imageres_path+imageres_name,img)
+
+    txt_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'.txt')
+    txt_f = open(txt_file, 'w')
+    
+    imgcroplist = []
+    for i, box in enumerate(box_list):
+        pt0=box[0]
+        pt1=box[1]
+        pt2=box[2]
+        pt3=box[3]
+        imgout = img_bak[int(min(pt0[1],pt1[1])):int(max(pt2[1],pt3[1])),int(min(pt0[0],pt3[0])):int(max(pt1[0],pt2[0]))]
+        imgcroplist.append(imgout)
+        #cv2.imwrite(imageres_path+imageres_name.split('.')[0]+'_'+str(i)+'.jpg',imgout)
+    
+    
+    modelrec = RecInfer(args.modelrec_path)
+    print(type(imgcroplist))
+    print(type(imgcroplist[0]))
+    # for i in len(imgcroplist):
+    #     out = modelrec.predict(imgcroplist[i])
+    #     txt_f.write(out[0][0]+'\n')
+

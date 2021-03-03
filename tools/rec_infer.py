@@ -50,8 +50,8 @@ class RecInfer:
 def init_args():
     import argparse
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    parser.add_argument('--model_path', required=True, type=str, help='rec model path')
-    parser.add_argument('--img_path', required=True, type=str, help='img path for predict')
+    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/tmp.png')
     args = parser.parse_args()
     return args
 
@@ -63,4 +63,5 @@ if __name__ == '__main__':
     img = cv2.imread(args.img_path)
     model = RecInfer(args.model_path)
     out = model.predict(img)
-    print(out)
+    print(type(out[0]))
+    print(out[0][0])
