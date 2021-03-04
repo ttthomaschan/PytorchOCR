@@ -23,6 +23,7 @@ import cv2
 from matplotlib import pyplot as plt
 from torchocr.utils import draw_ocr_box_txt, draw_bbox
 import argparse
+import time
 
 
 class DetInfer:
@@ -96,11 +97,15 @@ class RecInfer:
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt02.png')
+    # parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    # parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    # parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt02.png')
+    parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
     args = parser.parse_args()
     
+    start = time.time()
     img = cv2.imread(args.img_path)
     img_bak = img.copy()
     modeldet = DetInfer(args.modeldet_path)
@@ -108,8 +113,8 @@ if __name__ == '__main__':
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = draw_bbox(img, box_list)
 
-    imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_images/'
-    imageres_name = 'mt02_result.jpg'
+    imageres_path = '/home/elimen/Data/dbnet_pytorch/test_images/'
+    imageres_name = 'mt03_result.jpg'
     cv2.imwrite(imageres_path+imageres_name,img)
 
     txt_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'.txt')
@@ -121,15 +126,20 @@ if __name__ == '__main__':
         pt1=box[1]
         pt2=box[2]
         pt3=box[3]
-        imgout = img_bak[int(min(pt0[1],pt1[1])):int(max(pt2[1],pt3[1])),int(min(pt0[0],pt3[0])):int(max(pt1[0],pt2[0]))]
+        imgout = img_bak[int(min(pt0[1],pt1[1]))-3 :int(max(pt2[1],pt3[1])) +3,int(min(pt0[0],pt3[0]))-3:int(max(pt1[0],pt2[0]))+3]
         imgcroplist.append(imgout)
         #cv2.imwrite(imageres_path+imageres_name.split('.')[0]+'_'+str(i)+'.jpg',imgout)
     
-    
     modelrec = RecInfer(args.modelrec_path)
-    print(type(imgcroplist))
-    print(type(imgcroplist[0]))
-    # for i in len(imgcroplist):
-    #     out = modelrec.predict(imgcroplist[i])
-    #     txt_f.write(out[0][0]+'\n')
+
+    for i in range(len(imgcroplist)-1,-1,-1):
+        out = modelrec.predict(imgcroplist[i])
+        txt_f.write(out[0][0]+'\n')
+    txt_f.close()
+
+
+    print("Mission complete, it took {:.3f}s".format(time.time() - start))
+    print(len(imgcroplist))
+    print(out[0][0])
+    print('Well done!')
 

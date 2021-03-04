@@ -36,6 +36,7 @@ class RecInfer:
 
     def predict(self, img):
         # 预处理根据训练来
+        print("input of rec_infer:" + str(type(img)))
         img = self.process.resize_with_specific_height(img)
         # img = self.process.width_pad_img(img, 120)
         img = self.process.normalize_img(img)
@@ -43,6 +44,7 @@ class RecInfer:
         tensor = tensor.unsqueeze(dim=0)
         tensor = tensor.to(self.device)
         out = self.model(tensor)
+        print(out.shape)
         txt = self.converter.decode(out.softmax(dim=2).detach().cpu().numpy())
         return txt
 
@@ -50,8 +52,8 @@ class RecInfer:
 def init_args():
     import argparse
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
-    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/tmp.png')
+    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/tmp.png')
     args = parser.parse_args()
     return args
 
@@ -62,6 +64,7 @@ if __name__ == '__main__':
     args = init_args()
     img = cv2.imread(args.img_path)
     model = RecInfer(args.model_path)
+    print(type(img))
     out = model.predict(img)
     print(type(out[0]))
     print(out[0][0])
