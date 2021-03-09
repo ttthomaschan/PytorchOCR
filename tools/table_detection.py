@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 
 def line_detection(image):
-    img_name = "mt04"
-    res_path = "/home/junlin/Git/github/dbnet_pytorch/test_results/"
+    img_name = "mt02"
+    #res_path = "/home/junlin/Git/github/dbnet_pytorch/test_results/"
+    res_path = "/home/elimen/Data/dbnet_pytorch/test_results/"
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     bw = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 1)
@@ -16,7 +17,7 @@ def line_detection(image):
     Read txt lines for bbox location.
     '''
     zeros = np.zeros((image.shape), dtype=np.uint8)
-    bbox_file = open(res_path +'mt04_result_bbox.txt', 'r')
+    bbox_file = open(res_path + img_name + '_result_bbox.txt', 'r')
     bbox_lines = bbox_file.readlines()
     bboxes_loc = []
     for line in bbox_lines:
@@ -187,13 +188,66 @@ def line_detection(image):
         cv2.line(img, (x1,y1), (x2,y2), (0, 0, 255), 1)
         cv2.line(zerostmp, (x1,y1), (x2,y2), (0, 0, 255), 1)
     
+    print("ver: " + str(len(ver)))
+    print("hor: " + str(len(hor)))
     cv2.imwrite(res_path + img_name + '_interresults.jpg',zerostmp)
     
     #cv2.imshow("image",img)
     #cv2.waitKey(0)
     #######################################################################
 
-    return hor,ver,img
+    return hor,ver,img,zerostmp
 
-hori, vert, dst = line_detection(cv2.imread('/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png'))
-cv2.imwrite('/home/junlin/Git/github/dbnet_pytorch/test_results/mt04_results.jpg',dst)
+def calc_abc_from_line(x0, y0, x1, y1):
+    a = y0 - y1
+    b = x1 - x0
+    c = x0*y1 - x1*y0
+    return a, b, c
+
+def get_line_cross_point(line1, line2):
+    # x1y1x2y2
+    a0, b0, c0 = calc_abc_from_line(*line1)
+    a1, b1, c1 = calc_abc_from_line(*line2)
+    D = a0 * b1 - a1 * b0
+    if D == 0:
+        return None
+    x = (b0 * c1 - b1 * c0) / D
+    y = (a1 * c0 - a0 * c1) / D
+    # print(x, y)
+    return x, y
+
+def calc_pointline_dist(point,line):
+    x0,y0,x1,y1 = line
+    A = y0 - y1
+    B = x1 - x0
+    C = x0*y1 - x1*y0
+    return np.abs(A * point[0] + B * point[1] + C) / (np.sqrt(A**2 + B**2))
+
+def is_pointonlinesegment(point,line):
+    x1,y1,x2,y2 = line
+    offset = 5
+    if point[0] >= x1-offset and point[0] <= x2+offset and point[1] >= y1-offset and point[1] <= y2+offset:
+        return True
+    else:
+        return False
+
+
+def crosspoint_detection(horlines,verlines):
+    cross_points = []
+    for hori in horlines:
+        for vert in verlines:
+            tmpx, tmpy = get_line_cross_point(hori,vert)
+            if is_pointonlinesegment((tmpx, tmpy),hori) and is_pointonlinesegment((tmpx, tmpy),vert):
+                cross_points.append([tmpx, tmpy])
+    return cross_points
+
+def cell_detection():
+    
+
+hori, vert, dst, inter = line_detection(cv2.imread('/home/elimen/Data/dbnet_pytorch/test_images/mt02.png'))
+crosspoints = crosspoint_detection(hori, vert)
+for cros in crosspoints:
+    cv2.circle(dst,(int(cros[0]),int(cros[1])),1, (0, 0, 255),2)
+    cv2.circle(inter,(int(cros[0]),int(cros[1])),1, (0, 0, 255),2)
+cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results/mt02_results.jpg',dst)
+cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results/mt02_interresults.jpg',inter)

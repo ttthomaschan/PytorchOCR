@@ -97,12 +97,12 @@ class RecInfer:
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
-    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png')
-    # parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    # parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
-    # parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt01.png')
+    # parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    # parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
+    # parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png')
+    parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
     args = parser.parse_args()
     
     start = time.time()
@@ -113,8 +113,9 @@ if __name__ == '__main__':
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = draw_bbox(img, box_list)
 
-    imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_results/'
-    imageres_name = 'mt04_result.jpg'
+    #imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_results/'
+    imageres_path = '/home/elimen/Data/dbnet_pytorch/test_results/'
+    imageres_name = 'mt03_result.jpg'
     cv2.imwrite(imageres_path+imageres_name,img)
 
     txt_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'.txt')

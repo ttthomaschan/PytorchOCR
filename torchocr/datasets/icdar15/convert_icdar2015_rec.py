@@ -11,8 +11,8 @@ if __name__ == '__main__':
     test_image_directory = os.path.join(icdar2015_directory, 'ch4_test_images')
     test_gt_directory = os.path.join(icdar2015_directory, 'Challenge4_Test_Task4_GT')
     os.makedirs(target_directory, exist_ok=True)
-    os.makedirs(target_image_directory, exist_ok=True)
-    for m_name, m_image_directory, m_gt_directory in zip(['train', 'eval'],
+    os.makedirs(target_image_directory, exist_ok=True)`
+    for m_name, m_image_directory, m_gt_directory in zip(['train', 'eval'],`
                                                          [train_image_directory, test_image_directory],
                                                          [train_gt_directory, test_gt_directory]):
         m_index = 0
