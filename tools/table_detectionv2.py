@@ -2,8 +2,29 @@ import cv2
 import numpy as np
 import math
 import xlwt
-src='/home/elimen/Data/dbnet_pytorch/test_images/zd03.png'
+src='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png'
 respath='/home/elimen/Data/dbnet_pytorch/test_results_cell/'
+img_name='mt03'
+
+'''
+tmp operation:
+Read txt lines for bbox location.
+'''
+detnrec_file = open(respath + img_name + '_result.txt', 'r')
+detnrec_lines = detnrec_file.readlines()
+bboxes_loc = []
+rec_content = []
+for line in detnrec_lines:
+	loc, rec = line.split(']')
+	loc = loc.replace('[','')
+	loc = loc.replace(' ','')
+	x1 = int(loc.split(',')[0])
+	y1 = int(loc.split(',')[1])
+	x2 = int(loc.split(',')[2])
+	y2 = int(loc.split(',')[3])
+	bbox = [x1,y1,x2,y2]
+	bboxes_loc.append(bbox)
+	rec_content.append(rec)
 
 raw = cv2.imread(src, 1)
 # 灰度图片
@@ -71,10 +92,11 @@ x1=min(m_d_r[0]+padding, raw.shape[1])
 y0=max(m_u_l[1]-padding, 0)
 y1=min(m_d_r[1]+padding, raw.shape[0])
 
-bitwise_and_crop = bitwise_and[y0:y1,x0:x1]
-raw = raw[y0:y1,x0:x1]
-merge = merge[y0:y1,x0:x1]
-cv2.imwrite(respath+"5_裁剪融合图.jpg", merge)
+bitwise_and_crop = bitwise_and.copy()
+#bitwise_and_crop = bitwise_and[y0:y1,x0:x1]
+#raw = raw[y0:y1,x0:x1]
+#merge = merge[y0:y1,x0:x1]
+#cv2.imwrite(respath+"5_裁剪融合图.jpg", merge)
 
 
 # # 两张图片进行减法运算，去掉表格框线
@@ -121,16 +143,16 @@ print(len(x_point_arr),len(y_point_arr))
 # height and width list
 h_list=[y_point_arr[i+1]-y_point_arr[i] for i in range(len(y_point_arr)-1)]
 w_list=[x_point_arr[i+1]-x_point_arr[i] for i in range(len(x_point_arr)-1)]
-print("length message:")
-print(h_list)
-print(w_list)
+# print("length message:")
+# print(h_list)
+# print(w_list)
 
 
 '''
 关键点：2. 使用xlsxwriter库，编辑生成相应的Excel格式
 '''
 import xlsxwriter
-workbook = xlsxwriter.Workbook('/home/elimen/Data/dbnet_pytorch/test_results_cell/zd03.xlsx')     # 创建新的工作簿
+workbook = xlsxwriter.Workbook('/home/elimen/Data/dbnet_pytorch/test_results_cell/mt03.xlsx')     # 创建新的工作簿
 worksheet = workbook.add_worksheet()   # 添加新的工作表
 
 # 先按行列数设置单元格，不管单元格合并格式
@@ -141,28 +163,19 @@ for j in range(len(h_list)):
 	worksheet.set_row(j,h_list[j])
 
 '''
-函数 islianjie（） 用于判断两点之间是否有连接
+函数 islianjie（） 用于判断两点之间是否有连接。原理：两点之间 取多条 垂直的 横截线段，如果有像素值为0的，可以判断这两点是断开的。
 '''
 def islianjie(p1,p2,img): # 坐标p的格式是先y轴后x轴
 	if p1[0]==p2[0]:   # y坐标相同，在同一横线
 		for i in range(min(p1[1],p2[1]),max(p1[1],p2[1])+1):
 			if sum( [ img[j,i] for j in range( max(p1[0]-5, 0), min(p1[0]+5, img.shape[0]) ) ] )==0: # img mask 格式也是先y后x
-				print("竖线")
-				print( min(p1[1],p2[1]), max(p1[0]-5, 0) )
-				print( max(p1[1],p2[1])+1, min(p1[0]+5, img.shape[0]))
 				return False
 		return True
 
 	elif p1[1]==p2[1]:  # x坐标相同，在同一竖线
-		for i in range(min(p1[0],p2[0]), max(p1[0],p2[0])+1):
-			if sum( [img[i,j] for j in range(max(p1[1]-5,0), min(p1[1]+5,img.shape[1])) ] ) == 0:
-				print("竖线")
-				# print( max(p1[1]-5,0), min(p1[0],p2[0]))
-				# print( min(p1[1]+5,img.shape[1]), max(p1[0],p2[0])+1)
-				tmp = img
-				cv2.circle(img, ( max(p1[1]-5,0), min(p1[0],p2[0])), 1, (255, 255, 255),2)
-				cv2.circle(img, ( min(p1[1]+5,img.shape[1]), max(p1[0],p2[0])+1), 1, (255, 255, 255),2)
-				cv2.imwrite(respath+"5_裁剪融合图.jpg", merge)
+		tmpsum = 0
+		for i in range(min(p1[0],p2[0]), max(p1[0],p2[0])+1):   # y轴变化范围 
+			if sum( [img[i,j] for j in range(max(p1[1]-5,0), min(p1[1]+5,img.shape[1])) ] ) == 0:   # x轴变化范围
 				return False
 		return True
 
@@ -203,56 +216,91 @@ for i in range(len(lt_list_x)):
 crop_list={}
 for i in range(len(lt_list_x)):
 	for j in range(len(lt_list_y)):
-		crop_list['{},{}'.format(d['cell_{}_{}'.format(i,j)].belong[0],d['cell_{}_{}'.format(i,j)].belong[1])]=d['cell_{}_{}'.format(i,j)].rd
+		## crop_list字典以 “归属值” 为key，然后遍历所有单元格（一定要按顺序！），可以合并单元格
+		crop_list['{},{}'.format(d['cell_{}_{}'.format(i,j)].belong[0], d['cell_{}_{}'.format(i,j)].belong[1])]= d['cell_{}_{}'.format(i,j)].rd
 
-print(crop_list)
+print('crop_list length:')
+print(len(crop_list))
 
-zmax=0
-zmin=1e6
-zlt=[]
-zrd=[]
+
+tmpmax=0
+tmpmin=1e6
+zlt=[]  # 整张表格的最左上角点坐标
+zrd=[]  # 整张表格的最右下角点坐标
 for key in crop_list.keys():
 	lt=[int(i) for i in key.split(',')]
 	rd=crop_list[key]
-	# print(lt,rd)
-	if sum(rd)>zmax:
-		zrd=rd
-		zmax=sum(rd)
-	if sum(lt)<zmin:
-		zlt=lt
-		zmin=sum(lt)
-	cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results_cell/{}.jpg'.format(key),raw[lt[1]:rd[1],lt[0]:rd[0]])
+	#cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results_cell/{}.jpg'.format(key),raw[lt[1]:rd[1],lt[0]:rd[0]])  # 图片裁剪格式 img[y1:y2,x1:x2] or img[(y1,x1),(y2,x2)]
 
+	if sum(rd)>tmpmax:
+		zrd=rd
+		tmpmax=sum(rd)
+	if sum(lt)<tmpmin:
+		zlt=lt
+		tmpmin=sum(lt)
+	
 
 merge_format = workbook.add_format({
     'bold':     True,
-    'border':   1,  #6
+    'border':   1,
     'align':    'center',#水平居中
     'valign':   'vcenter',#垂直居中
     #'fg_color': '#D7E4BC',#颜色填充
 })
-for key in crop_list.keys():
-	lt=[int(i) for i in key.split(',')]
-	rd=crop_list[key]
 
-	lt_=[lt[0]-zlt[0],lt[1]-zlt[1]]
-	rd_=[rd[0]-zlt[0],rd[1]-zlt[1]]
-	#print(lt_)
-	#print(rd_)
-	for i in range(len(w_list)+1):
-		if lt_[0]==sum(w_list[:i]):
-			lt_col=chr(ord('A')+i)
-		if rd_[0]==sum(w_list[:i]):
-			rd_col=chr(ord('A')+i-1)
-	for i in range(len(h_list)+1):
-		if lt_[1]==sum(h_list[:i]):
-			lt_row=i+1
-		if rd_[1]==sum(h_list[:i]):
-			rd_row=i
-	if lt_col==rd_col and lt_row==rd_row:
-		worksheet.write('{}{}'.format(lt_col,lt_row),'1',merge_format)   # 写入内容
+
+def is_inside(cell, box):
+	c1,c2,c3,c4 = cell
+	b1,b2,b3,b4 = box
+	if b1>c1 and b2>c2 and b3<c3 and b4<c4:
+		return True
 	else:
-		worksheet.merge_range('{}{}:{}{}'.format(lt_col,lt_row,rd_col,rd_row),'2',merge_format)  # 合并单元格
+		return False
+
+'''
+根据crop_list, 遍历每个单元格，然后分配行列序号
+'''
+for key in crop_list.keys():
+	lt = [int(i) for i in key.split(',')]
+	rd = crop_list[key]
+
+	for i in range(len(bboxes_loc)):
+		box = bboxes_loc[i]
+		cell = [lt[0],lt[1],rd[0],rd[1]]
+		if is_inside(cell,box):
+			content = rec_content[i].split('\n')[0]
+			break
+		else:
+			content = ''
+		
+	lt_dist2ori = [lt[0]-zlt[0],lt[1]-zlt[1]]
+	rd_dist2ori = [rd[0]-zlt[0],rd[1]-zlt[1]]
+
+	## 水平方向 
+	for i in range(len(w_list)+1):
+		# 左上角
+		if lt_dist2ori[0]==sum(w_list[:i]):
+			lt_col=chr(ord('A')+i)
+			#print(lt_col)
+		# 右下角
+		if rd_dist2ori[0]==sum(w_list[:i]):
+			rd_col=chr(ord('A')+i-1)
+			#print(rd_col)
+	## 竖直方向
+	for i in range(len(h_list)+1):
+    	# 左上角
+		if lt_dist2ori[1]==sum(h_list[:i]):
+			lt_row=i+1
+			#print(lt_row)
+		# 右下角
+		if rd_dist2ori[1]==sum(h_list[:i]):
+			rd_row=i
+			#print(rd_row)
+
+	if lt_col==rd_col and lt_row==rd_row:
+		worksheet.write('{}{}'.format(lt_col,lt_row),'{}'.format(content),merge_format)   # 写入内容
+	else:
+		worksheet.merge_range('{}{}:{}{}'.format(lt_col,lt_row,rd_col,rd_row),'{}'.format(content),merge_format)  # 合并单元格
 
 
 workbook.close()

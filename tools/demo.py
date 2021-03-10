@@ -123,29 +123,35 @@ if __name__ == '__main__':
     
 
     '''
-    output the 
+    output the text recognition result
     '''
     box_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'_bbox.txt')
     box_f = open(box_file, 'w')
     imgcroplist = []
+    bbox_cornerlist = []
     for i, box in enumerate(box_list):
         pt0=box[0]
         pt1=box[1]
         pt2=box[2]
         pt3=box[3]
-        imgout = img_bak[int(min(pt0[1],pt1[1]))-3 :int(max(pt2[1],pt3[1])) +3,int(min(pt0[0],pt3[0]))-3:int(max(pt1[0],pt2[0]))+3]
+        imgout = img_bak[int(min(pt0[1],pt1[1]))-4 :int(max(pt2[1],pt3[1])) +4,int(min(pt0[0],pt3[0]))-4:int(max(pt1[0],pt2[0]))+4]
+        box_corner = [int(pt0[0]),int(pt0[1]),int(pt2[0]),int(pt2[1])]
         imgcroplist.append(imgout)
+        bbox_cornerlist.append(box_corner)
         ######
         box_f.write(str(pt0))
         box_f.write(str(pt2))
         box_f.write('\n')
-        #cv2.imwrite(imageres_path+imageres_name.split('.')[0]+'_'+str(i)+'.jpg',imgout)
+        cv2.imwrite(imageres_path+imageres_name.split('.')[0]+'_'+str(i)+'.jpg',imgout)
     
     modelrec = RecInfer(args.modelrec_path)
 
     for i in range(len(imgcroplist)-1,-1,-1):
         out = modelrec.predict(imgcroplist[i])
-        txt_f.write(out[0][0]+'\n')
+
+        txt_f.write(str(bbox_cornerlist[i]))
+        txt_f.write(out[0][0]+ '\n')
+        
     txt_f.close()
 
 

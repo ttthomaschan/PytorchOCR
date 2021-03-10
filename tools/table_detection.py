@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 def line_detection(image):
-    img_name = "mt02"
+    img_name = "mt03"
     #res_path = "/home/junlin/Git/github/dbnet_pytorch/test_results/"
     res_path = "/home/elimen/Data/dbnet_pytorch/test_results/"
 
@@ -244,10 +244,10 @@ def crosspoint_detection(horlines,verlines):
 def cell_detection():
     
 
-hori, vert, dst, inter = line_detection(cv2.imread('/home/elimen/Data/dbnet_pytorch/test_images/mt02.png'))
+hori, vert, dst, inter = line_detection(cv2.imread('/home/elimen/Data/dbnet_pytorch/test_images/mt03.png'))
 crosspoints = crosspoint_detection(hori, vert)
 for cros in crosspoints:
     cv2.circle(dst,(int(cros[0]),int(cros[1])),1, (0, 0, 255),2)
     cv2.circle(inter,(int(cros[0]),int(cros[1])),1, (0, 0, 255),2)
-cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results/mt02_results.jpg',dst)
-cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results/mt02_interresults.jpg',inter)
+cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results/mt03_results.jpg',dst)
+cv2.imwrite('/home/elimen/Data/dbnet_pytorch/test_results/mt03_interresults.jpg',inter)
