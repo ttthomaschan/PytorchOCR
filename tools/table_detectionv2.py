@@ -160,7 +160,9 @@ col_alpha=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','
 for i in range(len(w_list)):
 	worksheet.set_column('{}:{}'.format(col_alpha[i],col_alpha[i]),w_list[i]/6) 
 for j in range(len(h_list)):
-	worksheet.set_row(j,h_list[j])
+	worksheet.set_row(j+1,h_list[j])
+
+
 
 '''
 函数 islianjie（） 用于判断两点之间是否有连接。原理：两点之间 取多条 垂直的 横截线段，如果有像素值为0的，可以判断这两点是断开的。
@@ -243,11 +245,18 @@ for key in crop_list.keys():
 merge_format = workbook.add_format({
     'bold':     True,
     'border':   1,
-    'align':    'center',#水平居中
+    'align':    'left',#水平居中
     'valign':   'vcenter',#垂直居中
     #'fg_color': '#D7E4BC',#颜色填充
 })
 
+header_format = workbook.add_format({
+    'bold':     True,
+    'border':   1,
+    'align':    'center',#水平居中
+    'valign':   'vcenter',#垂直居中
+    #'fg_color': 'blue',#颜色填充
+})
 
 def is_inside(cell, box):
 	c1,c2,c3,c4 = cell
@@ -257,9 +266,11 @@ def is_inside(cell, box):
 	else:
 		return False
 
+
 '''
-根据crop_list, 遍历每个单元格，然后分配行列序号
+collect and write the header first
 '''
+stored_index = []
 for key in crop_list.keys():
 	lt = [int(i) for i in key.split(',')]
 	rd = crop_list[key]
@@ -268,10 +279,35 @@ for key in crop_list.keys():
 		box = bboxes_loc[i]
 		cell = [lt[0],lt[1],rd[0],rd[1]]
 		if is_inside(cell,box):
-			content = rec_content[i].split('\n')[0]
-			break
-		else:
-			content = ''
+			stored_index.append(i)
+tmp_index = [ind for ind in range(len(bboxes_loc))]
+header_index = []
+for j in range(len(tmp_index)):
+	if tmp_index[j] not in stored_index:
+		header_index.append(j)
+if header_index:
+	header = ''
+	for j in range(len(header_index)):
+		header += rec_content[j]
+worksheet.set_row(0, sum(h_list)/len(h_list)*4)
+worksheet.merge_range('{}{}:{}{}'.format('A',1,chr(ord('A')+len(w_list)-1),1),'{}'.format(header),header_format)  # 合并单元格
+
+
+'''
+根据crop_list, 遍历每个单元格，然后分配行列序号
+'''
+for key in crop_list.keys():
+	lt = [int(i) for i in key.split(',')]
+	rd = crop_list[key]
+
+	content = []
+	for i in range(len(bboxes_loc)):
+		box = bboxes_loc[i]
+		cell = [lt[0],lt[1],rd[0],rd[1]]
+		if is_inside(cell,box):
+			content.append(rec_content[i].split('\n')[0])
+
+			
 		
 	lt_dist2ori = [lt[0]-zlt[0],lt[1]-zlt[1]]
 	rd_dist2ori = [rd[0]-zlt[0],rd[1]-zlt[1]]
@@ -290,17 +326,23 @@ for key in crop_list.keys():
 	for i in range(len(h_list)+1):
     	# 左上角
 		if lt_dist2ori[1]==sum(h_list[:i]):
-			lt_row=i+1
+			lt_row=i+2
 			#print(lt_row)
 		# 右下角
 		if rd_dist2ori[1]==sum(h_list[:i]):
-			rd_row=i
+			rd_row=i+1
 			#print(rd_row)
 
+	contents = ''
+	if content:
+		for k in range(len(content)-1):
+			contents += content[k] + '\n'
+		contents += content[len(content)-1]
+
 	if lt_col==rd_col and lt_row==rd_row:
-		worksheet.write('{}{}'.format(lt_col,lt_row),'{}'.format(content),merge_format)   # 写入内容
+		worksheet.write('{}{}'.format(lt_col,lt_row),'{}'.format(contents),merge_format)   # 写入内容
 	else:
-		worksheet.merge_range('{}{}:{}{}'.format(lt_col,lt_row,rd_col,rd_row),'{}'.format(content),merge_format)  # 合并单元格
+		worksheet.merge_range('{}{}:{}{}'.format(lt_col,lt_row,rd_col,rd_row),'{}'.format(contents),merge_format)  # 合并单元格
 
 
 workbook.close()

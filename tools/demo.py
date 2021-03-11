@@ -94,6 +94,16 @@ class RecInfer:
         txt = self.converter.decode(out.softmax(dim=2).detach().cpu().numpy())
         return txt
 
+class TabRecognition:
+    def __init__(self):
+
+    def lineDetection(self):
+    
+    def cellRecognition(self):
+
+def generateExcelFile():
+    
+
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
