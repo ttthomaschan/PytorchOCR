@@ -25,15 +25,15 @@ for line in detnrec_lines:
 	bbox = [x1,y1,x2,y2]
 	bboxes_loc.append(bbox)
 	rec_content.append(rec)
+print(bboxes_loc)
 
 raw = cv2.imread(src, 1)
 # 灰度图片
 gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 binary = cv2.adaptiveThreshold(~gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, -5)
-# 展示图片
 
 rows, cols = binary.shape
-scale2=15
+scale2 = 15
 scale = 20
 # 自适应获取核值
 # 识别横线:
@@ -65,34 +65,34 @@ cv2.imwrite(respath+"4_横竖交点阈值化.jpg", binary)
 '''
 关键点：1. findcontours（）的应用， 定位每个cell。输出为 ys，xs
 '''
-contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-area=[]
-for k in range(len(contours)):
-	area.append(cv2.contourArea(contours[k]))
-max_idx = np.argmax(np.array(area))
-m_d_r=[]
-m_u_l=[]
-max_p=0
-min_p=1e6
-for  l1 in contours[max_idx]:
-	for l2 in l1:
-		if sum(l2)>max_p:
-			max_p=sum(l2)
-			d_r=l2
-		if sum(l2)<min_p:
-			min_p=sum(l2)
-			u_l=l2
-m_d_r=d_r
-m_u_l=u_l
+# contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+# area=[]
+# for k in range(len(contours)):
+# 	area.append(cv2.contourArea(contours[k]))
+# max_idx = np.argmax(np.array(area))
+# m_d_r=[]
+# m_u_l=[]
+# max_p=0
+# min_p=1e6
+# for  l1 in contours[max_idx]:
+# 	for l2 in l1:
+# 		if sum(l2)>max_p:
+# 			max_p=sum(l2)
+# 			d_r=l2
+# 		if sum(l2)<min_p:
+# 			min_p=sum(l2)
+# 			u_l=l2
+# m_d_r=d_r
+# m_u_l=u_l
 
-## 截取图片中表格部分，被裁剪图片包括 1)bitwise_and, 2)merge, 3)raw
-padding=5
-x0=max(m_u_l[0]-padding, 0)
-x1=min(m_d_r[0]+padding, raw.shape[1])
-y0=max(m_u_l[1]-padding, 0)
-y1=min(m_d_r[1]+padding, raw.shape[0])
+# ## 截取图片中表格部分，被裁剪图片包括 1)bitwise_and, 2)merge, 3)raw
+# padding=5
+# x0=max(m_u_l[0]-padding, 0)
+# x1=min(m_d_r[0]+padding, raw.shape[1])
+# y0=max(m_u_l[1]-padding, 0)
+# y1=min(m_d_r[1]+padding, raw.shape[0])
 
-bitwise_and_crop = bitwise_and.copy()
+# bitwise_and_crop = bitwise_and.copy()
 #bitwise_and_crop = bitwise_and[y0:y1,x0:x1]
 #raw = raw[y0:y1,x0:x1]
 #merge = merge[y0:y1,x0:x1]
@@ -110,7 +110,7 @@ bitwise_and_crop = bitwise_and.copy()
 
 
 # 将交点标识提取出来，存放在ys，xs
-ys, xs = np.where(bitwise_and_crop > 0)
+ys, xs = np.where(bitwise_and > 0)
 
 '''
 关键点：2. 利用相邻位置信息，过滤重复直线。输出为： 
@@ -271,6 +271,7 @@ def is_inside(cell, box):
 collect and write the header first
 '''
 stored_index = []
+print(bboxes_loc)
 for key in crop_list.keys():
 	lt = [int(i) for i in key.split(',')]
 	rd = crop_list[key]
