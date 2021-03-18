@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'mainwindow.ui'
+#
+# Created by: PyQt5 UI code generator 5.14.1
+#
+# WARNING! All changes made in this file will be lost!
+
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(843, 591)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.detButton = QtWidgets.QPushButton(self.centralwidget)
+        self.detButton.setGeometry(QtCore.QRect(500, 510, 87, 25))
+        self.detButton.setObjectName("detButton")
+        self.recogButton = QtWidgets.QPushButton(self.centralwidget)
+        self.recogButton.setGeometry(QtCore.QRect(200, 510, 90, 25))
+        self.recogButton.setObjectName("recogButton")
+        self.inputPath = QtWidgets.QTextEdit(self.centralwidget)
+        self.inputPath.setGeometry(QtCore.QRect(130, 20, 541, 31))
+        self.inputPath.setObjectName("inputPath")
+        self.pathLabel = QtWidgets.QLabel(self.centralwidget)
+        self.pathLabel.setGeometry(QtCore.QRect(50, 30, 71, 17))
+        self.pathLabel.setObjectName("pathLabel")
+        self.loadButton = QtWidgets.QPushButton(self.centralwidget)
+        self.loadButton.setGeometry(QtCore.QRect(690, 60, 91, 25))
+        self.loadButton.setObjectName("loadButton")
+        self.imageView = QtWidgets.QLabel(self.centralwidget)
+        self.imageView.setGeometry(QtCore.QRect(110, 110, 291, 381))
+        self.imageView.setText("")
+        self.imageView.setObjectName("imageView")
+        self.pathLabel_2 = QtWidgets.QLabel(self.centralwidget)
+        self.pathLabel_2.setGeometry(QtCore.QRect(50, 70, 71, 17))
+        self.pathLabel_2.setObjectName("pathLabel_2")
+        self.inputPath_2 = QtWidgets.QTextEdit(self.centralwidget)
+        self.inputPath_2.setGeometry(QtCore.QRect(130, 60, 541, 31))
+        self.inputPath_2.setObjectName("inputPath_2")
+        self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
+        self.scrollArea.setGeometry(QtCore.QRect(430, 100, 331, 401))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 329, 399))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.gridLayout = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
+        self.gridLayout.setObjectName("gridLayout")
+        self.imageView_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.imageView_2.setText("")
+        self.imageView_2.setObjectName("imageView_2")
+        self.gridLayout.addWidget(self.imageView_2, 0, 0, 1, 1)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.recButton = QtWidgets.QPushButton(self.centralwidget)
+        self.recButton.setGeometry(QtCore.QRect(610, 510, 87, 25))
+        self.recButton.setObjectName("recButton")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 843, 22))
+        self.menubar.setObjectName("menubar")
+        self.menuMy_First_APP = QtWidgets.QMenu(self.menubar)
+        self.menuMy_First_APP.setObjectName("menuMy_First_APP")
+        self.menuExit = QtWidgets.QMenu(self.menubar)
+        self.menuExit.setObjectName("menuExit")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+        self.actionINFO = QtWidgets.QAction(MainWindow)
+        self.actionINFO.setObjectName("actionINFO")
+        self.menuMy_First_APP.addSeparator()
+        self.menuMy_First_APP.addSeparator()
+        self.menuMy_First_APP.addSeparator()
+        self.menuMy_First_APP.addAction(self.actionINFO)
+        self.menubar.addAction(self.menuMy_First_APP.menuAction())
+        self.menubar.addAction(self.menuExit.menuAction())
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.detButton.setText(_translate("MainWindow", "Det Results"))
+        self.recogButton.setText(_translate("MainWindow", "Recognition"))
+        self.pathLabel.setText(_translate("MainWindow", "IMG Path"))
+        self.loadButton.setText(_translate("MainWindow", "Load"))
+        self.pathLabel_2.setText(_translate("MainWindow", "RES Path"))
+        self.recButton.setText(_translate("MainWindow", "Rec Results"))
+        self.menuMy_First_APP.setTitle(_translate("MainWindow", "My First APP"))
+        self.menuExit.setTitle(_translate("MainWindow", "Exit"))
+        self.actionINFO.setText(_translate("MainWindow", "INFO"))
