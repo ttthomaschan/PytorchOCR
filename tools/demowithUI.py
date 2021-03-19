@@ -391,6 +391,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.recogButton.clicked.connect(self.recognition_clicked)
 		self.ui.detButton.clicked.connect(self.detResult_clicked)
 		self.ui.recButton.clicked.connect(self.recResult_clicked)
+		self.ui.scrollArea
 
 	def load_clicked(self):
 		self.imgPath = self.ui.inputPath.toPlainText()
@@ -471,6 +472,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.imageView_2.setText(contents)
 		print('recRes done')
 		return True
+	
+	# def sync_func(self):
+	# 	# 让QScrollArea横向滚动条的当前值和QScrollBar的值同步
+	# 	self.scrollArea.verticalScrollBar().setValue(self.verticalScrollBar.value())
 
 if __name__ == '__main__':
 

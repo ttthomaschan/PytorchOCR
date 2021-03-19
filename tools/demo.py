@@ -383,7 +383,7 @@ if __name__ == '__main__':
 	# parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
 	# parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
 	# parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png')
-	parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+	parser.add_argument('--modeldet_path', type=str, help='det model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
 	parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
 	parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
 	args = parser.parse_args()

@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,152 +13,132 @@
     <height>591</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="detButton">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>510</y>
-      <width>87</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Det Results</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="recogButton">
-    <property name="geometry">
-     <rect>
-      <x>200</x>
-      <y>510</y>
-      <width>90</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Recognition</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="inputPath">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
+      <x>50</x>
       <y>20</y>
-      <width>541</width>
-      <height>31</height>
+      <width>771</width>
+      <height>61</height>
      </rect>
     </property>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="pathLabel">
+       <property name="text">
+        <string>IMG Path</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QTextEdit" name="inputPath"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="pathLabel_2">
+       <property name="text">
+        <string>RES Path</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QTextEdit" name="inputPath_2"/>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="loadButton">
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
-   <widget class="QLabel" name="pathLabel">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>50</x>
-      <y>30</y>
-      <width>71</width>
-      <height>17</height>
+      <y>90</y>
+      <width>351</width>
+      <height>451</height>
      </rect>
     </property>
-    <property name="text">
-     <string>IMG Path</string>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="imageView">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="recogButton">
+       <property name="text">
+        <string>Recognition</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
-   <widget class="QPushButton" name="loadButton">
-    <property name="geometry">
-     <rect>
-      <x>690</x>
-      <y>60</y>
-      <width>91</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Load</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="imageView">
-    <property name="geometry">
-     <rect>
-      <x>110</x>
-      <y>110</y>
-      <width>291</width>
-      <height>381</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="QLabel" name="pathLabel_2">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>70</y>
-      <width>71</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>RES Path</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="inputPath_2">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>60</y>
-      <width>541</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QScrollArea" name="scrollArea">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>430</x>
-      <y>100</y>
-      <width>331</width>
-      <height>401</height>
+      <y>90</y>
+      <width>371</width>
+      <height>451</height>
      </rect>
     </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>329</width>
-       <height>399</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="imageView_2">
-        <property name="text">
-         <string/>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0" colspan="2">
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>367</width>
+          <height>416</height>
+         </rect>
         </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="imageView_2">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
-      </item>
-     </layout>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="recButton">
-    <property name="geometry">
-     <rect>
-      <x>610</x>
-      <y>510</y>
-      <width>87</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Rec Results</string>
-    </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="detButton">
+       <property name="text">
+        <string>Det Results</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="recButton">
+       <property name="text">
+        <string>Rec Results</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -169,7 +152,7 @@
    </property>
    <widget class="QMenu" name="menuMy_First_APP">
     <property name="title">
-     <string>My First APP</string>
+     <string>Menu</string>
     </property>
     <addaction name="separator"/>
     <addaction name="separator"/>
