@@ -151,8 +151,8 @@ class TabRecognition:
 
 		# 形态学处理，识别竖线：
 		# scale = 40#scale越大，越能检测出不存在的线
-		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // scale))
-		kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // scale2))
+		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // 35))  # scale
+		kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // 20))  # scale2
 		eroded = cv2.erode(binary, kernel, iterations=1)
 		dilated_row = cv2.dilate(eroded, kernel2, iterations=1)
 		#cv2.imwrite(respath+"2_竖向形态学.jpg", dilated_row)

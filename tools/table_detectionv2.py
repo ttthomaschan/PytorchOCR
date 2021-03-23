@@ -2,30 +2,30 @@ import cv2
 import numpy as np
 import math
 import xlwt
-src='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png'
+src='/home/elimen/Data/dbnet_pytorch/test_images/ins01.png'
 respath='/home/elimen/Data/dbnet_pytorch/test_results_cell/'
-img_name='mt03'
+img_name='ins01'
 
 '''
 tmp operation:
 Read txt lines for bbox location.
 '''
-detnrec_file = open(respath + img_name + '_result.txt', 'r')
-detnrec_lines = detnrec_file.readlines()
-bboxes_loc = []
-rec_content = []
-for line in detnrec_lines:
-	loc, rec = line.split(']')
-	loc = loc.replace('[','')
-	loc = loc.replace(' ','')
-	x1 = int(loc.split(',')[0])
-	y1 = int(loc.split(',')[1])
-	x2 = int(loc.split(',')[2])
-	y2 = int(loc.split(',')[3])
-	bbox = [x1,y1,x2,y2]
-	bboxes_loc.append(bbox)
-	rec_content.append(rec)
-print(bboxes_loc)
+# detnrec_file = open(respath + img_name + '_result.txt', 'r')
+# detnrec_lines = detnrec_file.readlines()
+# bboxes_loc = []
+# rec_content = []
+# for line in detnrec_lines:
+# 	loc, rec = line.split(']')
+# 	loc = loc.replace('[','')
+# 	loc = loc.replace(' ','')
+# 	x1 = int(loc.split(',')[0])
+# 	y1 = int(loc.split(',')[1])
+# 	x2 = int(loc.split(',')[2])
+# 	y2 = int(loc.split(',')[3])
+# 	bbox = [x1,y1,x2,y2]
+# 	bboxes_loc.append(bbox)
+# 	rec_content.append(rec)
+# print(bboxes_loc)
 
 raw = cv2.imread(src, 1)
 # 灰度图片
@@ -46,10 +46,12 @@ cv2.imwrite(respath+"1_横向形态学.jpg", dilated_col)
 
 # 识别竖线：
 # scale = 40#scale越大，越能检测出不存在的线
-kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // scale2))
-
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // scale))
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // 35)) # scale 
+kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // 20))  #scale2
+print("erode size:{}".format(rows//scale))
+print("dilate size:{}".format(rows//scale2))
 eroded = cv2.erode(binary, kernel, iterations=1)
+cv2.imwrite(respath+"2-0_eroded.jpg", eroded)
 dilated_row = cv2.dilate(eroded, kernel2, iterations=1)
 cv2.imwrite(respath+"2_竖向形态学.jpg", dilated_row)
 

@@ -26,8 +26,10 @@ import argparse
 import time
 import numpy as np
 import xlsxwriter
+import subprocess
 
 from PyQt5 import QtWidgets, uic, QtGui
+from PyQt5.QtWidgets import QFileDialog
 from MainWindow import Ui_MainWindow
 
 
@@ -155,8 +157,8 @@ class TabRecognition:
 
 		# 形态学处理，识别竖线：
 		# scale = 40#scale越大，越能检测出不存在的线
-		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // scale))
-		kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // scale2))
+		kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // 35))  # scale
+		kernel2 = cv2.getStructuringElement(cv2.MORPH_RECT, (1, rows // 20))  # scale2
 		eroded = cv2.erode(binary, kernel, iterations=1)
 		dilated_row = cv2.dilate(eroded, kernel2, iterations=1)
 		#cv2.imwrite(respath+"2_竖向形态学.jpg", dilated_row)
@@ -391,6 +393,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.recogButton.clicked.connect(self.recognition_clicked)
 		self.ui.detButton.clicked.connect(self.detResult_clicked)
 		self.ui.recButton.clicked.connect(self.recResult_clicked)
+		self.ui.excelButton.clicked.connect(self.excelResult_clicked)
 		self.ui.scrollArea
 
 	def load_clicked(self):
@@ -416,8 +419,8 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.srcImg = cv2.cvtColor(self.srcImg, cv2.COLOR_BGR2RGB)
 		self.boxImg = draw_bbox(self.srcImg, box_list)
 
-		imageres_name = 'mt03_bbox.jpg'
-		cv2.imwrite(self.resPath+imageres_name,self.boxImg)
+		res_name = self.imgPath.split('/')[-1].split('.')[0] #'mt03_bbox.jpg'
+		cv2.imwrite(self.resPath + res_name +'_bbox.jpg', self.boxImg)
 
 		## Recognition
 		# '''
@@ -425,7 +428,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		# '''
 		imgcroplist = []
 		bbox_cornerlist = []
-		txt_file = os.path.join(self.resPath, imageres_name.split('.')[0]+'.txt')
+		txt_file = os.path.join(self.resPath, res_name +'_bbox.txt')
 		txt_f = open(txt_file, 'w')
 		for i, box in enumerate(box_list):
 			pt0,pt1,pt2,pt3=box
@@ -448,8 +451,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 		tab_rec = TabRecognition(img_bak)
 		crop_list,height_list, width_list= tab_rec.detnrec()
-		resultname = 'mt03.xlsx'
-		generateExcelFile(self.resPath,resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
+		self.resultname = res_name + '.xlsx'
+		generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
 		return box_list, self.rec_cont
 
 	def detResult_clicked(self):
@@ -460,7 +463,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		QtPix = QtGui.QPixmap.fromImage(QtImg)
 		self.ui.imageView_2.setScaledContents(True) 
 		self.ui.imageView_2.setPixmap(QtPix)
-		print('detRes done')
+		print('DetRes show.')
 		return True
 	
 	def recResult_clicked(self):
@@ -470,12 +473,19 @@ class MainWindow(QtWidgets.QMainWindow):
 		for content in self.rec_cont:
 			contents = contents + content + '\n'
 		self.ui.imageView_2.setText(contents)
-		print('recRes done')
+		print('RecRes show.')
 		return True
 	
-	# def sync_func(self):
-	# 	# 让QScrollArea横向滚动条的当前值和QScrollBar的值同步
-	# 	self.scrollArea.verticalScrollBar().setValue(self.verticalScrollBar.value())
+	def excelResult_clicked(self):
+			
+		#file = QFileDialog.getOpenFileName(self,"选取文件", self.resPath,"*.xlsx")
+		res_file = self.resPath + self.resultname
+		print(res_file)
+		if sys.platform == 'linux':
+			subprocess.call(["xdg-open", res_file])
+		else:
+			os.startfile(file)
+		return True
 
 if __name__ == '__main__':
 
