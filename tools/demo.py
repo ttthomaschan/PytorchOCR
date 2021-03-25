@@ -25,7 +25,9 @@ from torchocr.utils import draw_ocr_box_txt, draw_bbox
 import argparse
 import time
 import numpy as np
+import pandas as pd
 import xlsxwriter
+from addict import Dict
 
 # 构建一个类，作用类似于结构体
 class cell:
@@ -33,7 +35,6 @@ class cell:
 		self.lt=lt
 		self.rd=rd
 		self.belong=belong   # 也是以角点来表示，一个单元格归属于它的左上角，如果归属同一个点，说明是同一个单元格！
-
 
 
 class DetInfer:
@@ -47,6 +48,7 @@ class DetInfer:
 		self.model.load_state_dict(state_dict)
 
 		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+		#self.device = 'cpu'
 		self.model.to(self.device)
 		self.model.eval()
 		self.resize = ResizeFixedSize(736, False)
@@ -74,7 +76,6 @@ class DetInfer:
 			box_list, score_list = [], []
 		return box_list, score_list
 
-
 class RecInfer:
 	def __init__(self, model_path):
 		ckpt = torch.load(model_path, map_location='cpu')
@@ -86,6 +87,7 @@ class RecInfer:
 		self.model.load_state_dict(state_dict)
 
 		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+		# self.device = 'cpu'
 		self.model.to(self.device)
 		self.model.eval()
 
@@ -103,7 +105,6 @@ class RecInfer:
 		out = self.model(tensor)
 		txt = self.converter.decode(out.softmax(dim=2).detach().cpu().numpy())
 		return txt
-
 
 class TabRecognition:
 	def __init__(self,image):
@@ -247,7 +248,6 @@ class TabRecognition:
 		#return crop_list
 		return self.crop_list, h_list, w_list
 
-
 def generateExcelFile(path,filename,bboxes_loc,rec_content,crop_list,h_list,w_list):
 	workbook = xlsxwriter.Workbook(os.path.join(path + '/' + filename))     # 创建新的工作簿
 	worksheet = workbook.add_worksheet()   # 添加新的工作表
@@ -286,7 +286,7 @@ def generateExcelFile(path,filename,bboxes_loc,rec_content,crop_list,h_list,w_li
 	tmpmax=0
 	tmpmin=1e6
 	zlt=[]  # 整张表格的最左上角点坐标
-	zrd=[]  # 整张表格的最右下角点坐标
+	zrd=[]  # 整张表格的最右下角点坐标, 只存储，没有使用
 	for key in crop_list.keys():
 		lt=[int(i) for i in key.split(',')]
 		rd=crop_list[key]
@@ -375,7 +375,25 @@ def generateExcelFile(path,filename,bboxes_loc,rec_content,crop_list,h_list,w_li
 			worksheet.merge_range('{}{}:{}{}'.format(lt_col,lt_row,rd_col,rd_row),'{}'.format(contents),merge_format)  # 合并单元格
 	
 	workbook.close()
-	return workbook
+	res_df = pd.read_excel(os.path.join(path + '/' + filename))
+	resDict = Dict()
+	headline = []
+	for i in range(len(res_df.iloc[0])):
+		headline.append(res_df.iloc[0,i])
+
+	contents = []
+	for i in range(1,res_df.shape[0]):
+		row = []
+		for j in range(res_df.shape[1]):
+			row.append(res_df.iloc[i,j])
+		contents.append(row)
+
+	resDict.header = res_df.columns[0]
+	resDict.data.columns = headline
+	resDict.data.contents = contents
+
+	return resDict
+
 
 if __name__ == '__main__':
 	
@@ -383,9 +401,9 @@ if __name__ == '__main__':
 	# parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
 	# parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
 	# parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png')
-	parser.add_argument('--modeldet_path', type=str, help='det model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-	parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
-	parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
+	parser.add_argument('--modeldet_path', type=str, help='det model path',default='../checkpoints/ch_det_server_db_res18.pth')
+	parser.add_argument('--modelrec_path', type=str, help='rec model path',default='../checkpoints/ch_rec_server_crnn_res34.pth')  # ch_rec_server_crnn_res34.pth  # ch_rec_moblie_crnn_mbv3.pth
+	parser.add_argument('--img_path', type=str, help='img path for predict',default='../test_images/mt03.png')
 	args = parser.parse_args()
 	
 	start = time.time()
@@ -403,11 +421,11 @@ if __name__ == '__main__':
 	img = draw_bbox(img, box_list)
 
 	#imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_results/'
-	imageres_path = '/home/elimen/Data/dbnet_pytorch/test_results/'
-	imageres_name = 'mt03_result.jpg'
-	cv2.imwrite(imageres_path+imageres_name,img)
+	imageres_path = '../test_results/'
+	res_name = args.img_path.split('/')[-1].split('.')[0]
+	cv2.imwrite(imageres_path + res_name + '_bbox.jpg',img)
 
-	txt_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'.txt')
+	txt_file = os.path.join(imageres_path, res_name + '_result.txt')
 	txt_f = open(txt_file, 'w')
 
 
@@ -421,7 +439,7 @@ if __name__ == '__main__':
 
 		imgout = img_bak[int(min(pt0[1],pt1[1]))-4 :int(max(pt2[1],pt3[1])) +4,int(min(pt0[0],pt3[0]))-4:int(max(pt1[0],pt2[0]))+4]
 		imgcroplist.append(imgout)
-		#cv2.imwrite(imageres_path+imageres_name.split('.')[0]+'_'+str(i)+'.jpg',imgout)
+		#cv2.imwrite(imageres_path+res_name +'_'+str(i)+'.jpg',imgout)
 
 		box_corner = [int(pt0[0]),int(pt0[1]),int(pt2[0]),int(pt2[1])]
 		bbox_cornerlist.append(box_corner)
@@ -438,10 +456,8 @@ if __name__ == '__main__':
 
 	tab_rec = TabRecognition(img_bak)
 	crop_list,height_list, width_list= tab_rec.detnrec()
-	path = '/home/elimen/Data/dbnet_pytorch/test_results'
-	resultname = 'mt03.xlsx'
-	generateExcelFile(path,resultname,bbox_cornerlist,rec_cont,crop_list,height_list,width_list)
-
+	resultname = res_name + '.xlsx'
+	resJSON = generateExcelFile(imageres_path,resultname,bbox_cornerlist,rec_cont,crop_list,height_list,width_list)
 	print("Mission complete, it took {:.3f}s".format(time.time() - start))
 
 
