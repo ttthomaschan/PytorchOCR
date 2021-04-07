@@ -403,7 +403,7 @@ if __name__ == '__main__':
 	# parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png')
 	parser.add_argument('--modeldet_path', type=str, help='det model path',default='../checkpoints/ch_det_server_db_res18.pth')
 	parser.add_argument('--modelrec_path', type=str, help='rec model path',default='../checkpoints/ch_rec_server_crnn_res34.pth')  # ch_rec_server_crnn_res34.pth  # ch_rec_moblie_crnn_mbv3.pth
-	parser.add_argument('--img_path', type=str, help='img path for predict',default='../test_images/insA.jpg')
+	parser.add_argument('--img_path', type=str, help='img path for predict',default='../test_images/mt03.png')
 	args = parser.parse_args()
 	
 	start = time.time()

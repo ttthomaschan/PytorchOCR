@@ -27,7 +27,7 @@ config = Dict()
 config.exp_name = 'DBNet'
 config.train_options = {
     # for train
-    'resume_from': '',  # 继续训练地址
+    'resume_from': '/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth',  # 继续训练地址
     'third_party_name': '',  # 加载paddle模型可选
     'checkpoint_save_dir': f"./output/{config.exp_name}/checkpoint",  # 模型保存地址，log文件也保存在这里
     'device': 'cuda:0',  # 不建议修改
@@ -49,7 +49,7 @@ config.optimizer = {
 config.model = {
     'type': "DetModel",
     'backbone': {"type": "ResNet", 'layers': 18, 'pretrained': True}, # ResNet or MobileNetV3
-    'neck': {"type": 'FPN', 'out_channels': 256},
+    'neck': {"type": 'DB_fpn', 'out_channels': 256}, # "type": 'FPN'
     'head': {"type": "DBHead"},
     'in_channels': 3,
 }

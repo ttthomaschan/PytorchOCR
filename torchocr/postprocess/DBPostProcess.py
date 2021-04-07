@@ -42,7 +42,10 @@ class DBPostProcess():
         height, width = pred.shape
         boxes = []
         new_scores = []
-        contours, _ = cv2.findContours((bitmap * 255).astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        if cv2.__version__.startswith('3'):
+            _, contours, _ = cv2.findContours((bitmap * 255).astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        if cv2.__version__.startswith('4'):
+            contours, _ = cv2.findContours((bitmap * 255).astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         for contour in contours[:self.max_candidates]:
             points, sside = self.get_mini_boxes(contour)
             points = np.array(points)

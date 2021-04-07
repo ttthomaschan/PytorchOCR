@@ -22,6 +22,7 @@ class DetInfer:
     def __init__(self, model_path):
         ckpt = torch.load(model_path, map_location='cpu')
         cfg = ckpt['cfg']
+        print(cfg)
         self.model = build_model(cfg['model'])
         state_dict = {}
         for k, v in ckpt['state_dict'].items():
@@ -60,11 +61,11 @@ class DetInfer:
 def init_args():
     import argparse
     parser = argparse.ArgumentParser(description='PytorchOCR infer')
-    #parser.add_argument('--model_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    #parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt02.png')
+    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/elimen/Data/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png')
     
-    parser.add_argument('--model_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-    parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt02.png')
+    # parser.add_argument('--model_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
+    # parser.add_argument('--img_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt03.png')
     args = parser.parse_args()
     return args
 
@@ -83,25 +84,19 @@ if __name__ == '__main__':
     
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = draw_bbox(img, box_list)
-    imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_images/'
-    imageres_name = 'mt02_result.jpg'
+    imageres_path = '../dbnet_pytorch/test_results/'
+    imageres_name = 'mt03_result.jpg'
     cv2.imwrite(imageres_path+imageres_name,img)
 
-    txt_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'.txt')
-    txt_f = open(txt_file, 'w')
+    # txt_file = os.path.join(imageres_path, imageres_name.split('.')[0]+'.txt')
+    # txt_f = open(txt_file, 'w')
 
-    imgcroplist = []
-    for box in box_list:
-        imgout = img_bak[]
-        print(box[0],box[1],box[2],box[3])
-        #txt_f.write(to_str(box[0]))
-        # txt_f.write(box[1])
-        # txt_f.write(box[2])
-        # txt_f.write(box[3]+'\n')
-    txt_f.close()
-
-    
-     
-
-
-    print("\nRecognition Result:\n")
+    # imgcroplist = []
+    # for box in box_list:
+    #     imgout = img_bak[]
+    #     print(box[0],box[1],box[2],box[3])
+    #     #txt_f.write(to_str(box[0]))
+    #     # txt_f.write(box[1])
+    #     # txt_f.write(box[2])
+    #     # txt_f.write(box[3]+'\n')
+    # txt_f.close()
