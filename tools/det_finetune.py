@@ -73,14 +73,16 @@ ckpt = torch.load(resume_from, map_location='cpu')
 model_dict = net.state_dict()
 pretrained_dict = ckpt['state_dict']
 
-print('######')
+txt_file = os.path.join('/home/junlin/Git/github/dbnet_pytorch/test_results', 'model_state.txt')
+txt_f = open(txt_file, 'w')
+
 for j in model_dict:
-    print(j)
-#print(model_dict)
-print('######')
+    txt_f.write(j)
+txt_f.write('######')
 for k in pretrained_dict:
-    print(k)
-print('######')
+    txt_f.write(k)
+
+txt_f.close()
 
 # net, _resumed_optimizer, global_state = load_checkpoint(net, resume_from, to_use_device, optimizer, third_name=train_options['third_party_name'])
 # print(net)
