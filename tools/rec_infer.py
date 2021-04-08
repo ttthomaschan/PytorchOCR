@@ -33,6 +33,7 @@ class RecInfer:
 
         self.process = RecDataProcess(cfg['dataset']['train']['dataset'])
         self.converter = CTCLabelConverter(cfg['dataset']['alphabet'])
+        print(cfg['dataset']['alphabet'])
 
     def predict(self, img):
         # 预处理根据训练来

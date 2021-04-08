@@ -32,7 +32,7 @@ config.train_options = {
     'checkpoint_save_dir': f"./output/{config.exp_name}/checkpoint", # 模型保存地址，log文件也保存在这里
     'device': 'cuda:0',# 不建议修改
     'epochs': 200,
-    'fine_tune_stage': ['backbone', 'neck', 'head'],
+    'fine_tune_stage': [ 'neck', 'head'],
     'print_interval': 10,  # step为单位
     'val_interval': 300,  # step为单位
     'ckpt_save_type': 'HighestAcc',  # HighestAcc：只保存最高准确率模型 ；FixedEpochStep：每隔ckpt_save_epoch个epoch保存一个
@@ -68,7 +68,7 @@ config.loss = {
 # ##lable文件
 ### 存在问题，gt中str-->label 是放在loss中还是放在dataloader中
 config.dataset = {
-    'alphabet': r'torchocr/datasets/alphabets/digit.txt',
+    'alphabet': r'torchocr/datasets/alphabets/ppocr_keys_v1.txt',
     'train': {
         'dataset': {
             'type': 'RecTextLineDataset',

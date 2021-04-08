@@ -22,7 +22,6 @@ class DetInfer:
     def __init__(self, model_path):
         ckpt = torch.load(model_path, map_location='cpu')
         cfg = ckpt['cfg']
-        print(cfg)
         self.model = build_model(cfg['model'])
         state_dict = {}
         for k, v in ckpt['state_dict'].items():
