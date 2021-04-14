@@ -72,7 +72,7 @@ config.dataset = {
     'train': {
         'dataset': {
             'type': 'RecTextLineDataset',
-            'file': r'path/train.txt',
+            'file': r'/home/elimen/Data/OCR_dataset/icdar2015/recognition/train.txt',
             'input_h': 32,
             'mean': 0.5,
             'std': 0.5,
@@ -92,7 +92,7 @@ config.dataset = {
     'eval': {
         'dataset': {
             'type': 'RecTextLineDataset',
-            'file': r'path/eval.txt',
+            'file': r'/home/elimen/Data/OCR_dataset/icdar2015/recognition/eval.txt',
             'input_h': 32,
             'mean': 0.5,
             'std': 0.5,

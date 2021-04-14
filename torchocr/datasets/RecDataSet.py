@@ -29,18 +29,18 @@ class RecTextLineDataset(Dataset):
         """
         self.augmentation = config.augmentation
         self.process = RecDataProcess(config)
-        self.str2idx = {c: i for i, c in enumerate(config.alphabet)}
+        self.str2idx = {c: i for i, c in enumerate(config.alphabet)}   ## 给alphabet中每个字符编号
         self.labels = []
         with open(config.file, 'r', encoding='utf-8') as f_reader:
             for m_line in f_reader.readlines():
                 params = m_line.strip().split('\t')
                 if len(params) == 2:
                     m_image_name, m_gt_text = params
-                    if True in [c not in self.str2idx for c in m_gt_text]:
+                    if True in [c not in self.str2idx for c in m_gt_text]:  ## 跳过alphabet中不包含的字符
                         continue
                     self.labels.append((m_image_name, m_gt_text))
 
-    def _find_max_length(self):
+    def _find_max_length(self):   ## 最长的文字段
         return max({len(_[1]) for _ in self.labels})
 
     def __len__(self):
@@ -54,7 +54,7 @@ class RecTextLineDataset(Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # do aug
         if self.augmentation:
-            img = pil2cv(self.process.aug_img(cv2pil(img)))
+            img = pil2cv(self.process.aug_img(cv2pil(img)))   ## cv2格式的图片输入输出，但是图像増广用PIL库，所以需要 PIL 和 cv2 相互转换。 
         return {'img': img, 'label': trans}
 
 
