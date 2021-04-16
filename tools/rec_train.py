@@ -24,6 +24,7 @@ from torch import optim
 from torchocr.networks import build_model, build_loss
 from torchocr.datasets import build_dataloader
 from torchocr.utils import get_logger, weight_init, load_checkpoint, save_checkpoint
+from tensorboardX import SummaryWriter
 
 
 def parse_args():
@@ -218,10 +219,27 @@ def train(net, optimizer, scheduler, loss_func, train_loader, eval_loader, to_us
         best_model = {'best_acc': 0, 'eval_loss': 0, 'model_path': '', 'eval_acc': 0., 'eval_ned': 0.}
         start_epoch = 0
         global_step = 0
+
+    graphCheck = False
     # 开始训练
     try:
         for epoch in range(start_epoch, train_options['epochs']):  # traverse each epoch
             net.train()  # train mode
+            
+            '''
+            Tensorboard Record -- ojbk
+            '''
+            if epoch == 0 and graphCheck:
+                dataiter = iter(train_loader)
+                img_batch = next(dataiter)['img']
+                writer = SummaryWriter(comment ='CRNN')
+                with writer:
+                    writer.add_graph(net, (img_batch,))
+                #logger.info(net.parameters)
+                # for param in net.parameters():
+                #     print(type(param), param.size())
+            
+
             start = time.time()
             for i, batch_data in enumerate(train_loader):  # traverse each batch in the epoch
                 current_lr = optimizer.param_groups[0]['lr']
@@ -231,8 +249,10 @@ def train(net, optimizer, scheduler, loss_func, train_loader, eval_loader, to_us
                 batch_data['targets_lengths'] = targets_lengths
                 # 清零梯度及反向传播
                 optimizer.zero_grad()
-                output = net.forward(batch_data['img'].to(to_use_device))
+                batch_data['img'] = batch_data['img'].to(to_use_device)
+                output = net.forward(batch_data['img'])
                 loss_dict = loss_func(output, batch_data)
+                logger.info(loss_dict)
                 loss_dict['loss'].backward()
                 torch.nn.utils.clip_grad_norm_(net.parameters(), 5)
                 optimizer.step()
@@ -292,7 +312,7 @@ def main():
 
     # ===> 训练信息的打印
     train_options = cfg.train_options
-    logger.info(cfg)
+    #logger.info(cfg)
     # ===>
     to_use_device = torch.device(
         train_options['device'] if torch.cuda.is_available() and ('cuda' in train_options['device']) else 'cpu')

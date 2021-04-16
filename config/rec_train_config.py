@@ -80,7 +80,7 @@ config.dataset = {
         },
         'loader': {
             'type': 'DataLoader',  # 使用torch dataloader只需要改为 DataLoader
-            'batch_size': 16,
+            'batch_size': 32,
             'shuffle': True,
             'num_workers': 1,
             'collate_fn': {
