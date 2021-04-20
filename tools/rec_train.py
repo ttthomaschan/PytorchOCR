@@ -252,7 +252,6 @@ def train(net, optimizer, scheduler, loss_func, train_loader, eval_loader, to_us
                 batch_data['img'] = batch_data['img'].to(to_use_device)
                 output = net.forward(batch_data['img'])
                 loss_dict = loss_func(output, batch_data)
-                logger.info(loss_dict)
                 loss_dict['loss'].backward()
                 torch.nn.utils.clip_grad_norm_(net.parameters(), 5)
                 optimizer.step()

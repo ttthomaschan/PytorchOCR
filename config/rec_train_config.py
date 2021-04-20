@@ -24,7 +24,10 @@
 from addict import Dict
 
 config = Dict()
+
 config.exp_name = 'CRNN'
+config.SEED = 927
+
 config.train_options = {
     # for train
     'resume_from': '', # 继续训练地址
@@ -39,7 +42,6 @@ config.train_options = {
     'ckpt_save_epoch': 4,  # epoch为单位, 只有ckpt_save_type选择FixedEpochStep时，该参数才有效
 }
 
-config.SEED = 927
 config.optimizer = {
     'type': 'Adam',
     'lr': 0.001,
@@ -51,6 +53,7 @@ config.lr_scheduler = {
     'step_size': 60,
     'gamma': 0.5
 }
+
 config.model = {
     'type': "RecModel",
     'backbone': {"type": "ResNet", 'layers': 18},

@@ -67,9 +67,10 @@ def build_dataloader(config):
     :param config: 数据集相关的配置，一般为 config['dataset']['train'] or config['dataset']['eval']
     :return: 根据配置构造好的 DataLoader 类对象
     """
-    # build dataset
     copy_config = copy.deepcopy(config)
     copy_config = Dict(copy_config)
+
+    # build dataset
     dataset = build_dataset(copy_config.dataset)
 
     # build loader

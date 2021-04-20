@@ -29,14 +29,14 @@ class RecTextLineDataset(Dataset):
         """
         self.augmentation = config.augmentation
         self.process = RecDataProcess(config)
-        self.str2idx = {c: i for i, c in enumerate(config.alphabet)}   ## 给alphabet中每个字符编号
+        self.str2idx = {c: i for i, c in enumerate(config.characters)}   ## 给characters中每个字符编号
         self.labels = []
         with open(config.file, 'r', encoding='utf-8') as f_reader:
             for m_line in f_reader.readlines():
                 params = m_line.strip().split('\t')
                 if len(params) == 2:
                     m_image_name, m_gt_text = params
-                    if True in [c not in self.str2idx for c in m_gt_text]:  ## 跳过alphabet中不包含的字符
+                    if True in [c not in self.str2idx for c in m_gt_text]:  ## 跳过characters中不包含的字符
                         continue
                     self.labels.append((m_image_name, m_gt_text))
 
@@ -81,7 +81,7 @@ class RecLmdbDataset(Dataset):
         self.process = RecDataProcess(config)
         self.filtered_index_list = []
         self.labels = []
-        self.str2idx = {c: i for i, c in enumerate(config.alphabet)}
+        self.str2idx = {c: i for i, c in enumerate(config.characters)}
         with self.env.begin(write=False) as txn:
             nSamples = int(txn.get('num-samples'.encode()))
             self.nSamples = nSamples
