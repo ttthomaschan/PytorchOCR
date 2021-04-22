@@ -448,11 +448,12 @@ class MainWindow(QtWidgets.QMainWindow):
 			txt_f.write(str(bbox_cornerlist[i]))
 			txt_f.write(out[0][0]+ '\n')	
 		txt_f.close()
-
-		tab_rec = TabRecognition(img_bak)
-		crop_list,height_list, width_list= tab_rec.detnrec()
-		self.resultname = res_name + '.xlsx'
-		generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
+		
+		'''Recognition and Generation of table'''
+		# tab_rec = TabRecognition(img_bak)
+		# crop_list,height_list, width_list= tab_rec.detnrec()
+		# self.resultname = res_name + '.xlsx'
+		# generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
 		return box_list, self.rec_cont
 
 	def detResult_clicked(self):

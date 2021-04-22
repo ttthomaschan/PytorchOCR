@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 import math
 import xlwt
-src='/home/elimen/Data/dbnet_pytorch/test_images/ins01.png'
+src='/home/elimen/Data/dbnet_pytorch/test_images/Red_thres.jpg'
 respath='/home/elimen/Data/dbnet_pytorch/test_results_cell/'
-img_name='ins01'
+img_name='Red_thres'
 
 '''
 tmp operation:
@@ -65,40 +65,59 @@ ret,binary = cv2.threshold(merge, 127, 255, cv2.THRESH_BINARY)
 cv2.imwrite(respath+"4_横竖交点阈值化.jpg", binary)
 
 '''
+keypoint: detect contours
+'''
+# image,contours,hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# print(len(contours))
+# img = raw
+# cv2.drawContours(img,contours,0,(0,255,0),5) 
+# cv2.imwrite(respath+"5_contours_0.jpg", img)
+
+'''
 关键点：1. findcontours（）的应用， 定位每个cell。输出为 ys，xs
 '''
-# contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-# area=[]
-# for k in range(len(contours)):
-# 	area.append(cv2.contourArea(contours[k]))
-# max_idx = np.argmax(np.array(area))
-# m_d_r=[]
-# m_u_l=[]
-# max_p=0
-# min_p=1e6
-# for  l1 in contours[max_idx]:
-# 	for l2 in l1:
-# 		if sum(l2)>max_p:
-# 			max_p=sum(l2)
-# 			d_r=l2
-# 		if sum(l2)<min_p:
-# 			min_p=sum(l2)
-# 			u_l=l2
-# m_d_r=d_r
-# m_u_l=u_l
+image, contours, hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+area=[]
+for k in range(len(contours)):
+	area.append(cv2.contourArea(contours[k]))
+max_idx = np.argmax(np.array(area))
+m_d_r=[]
+m_u_l=[]
+max_p=0
+min_p=1e6
+img = raw
+for  l1 in contours[max_idx]:
+	for l2 in l1:
+		cv2.circle(img,(l2[0],l2[1]),2,(0,0,255))
+		if sum(l2)>max_p:
+			max_p=sum(l2)
+			d_r=l2
+		if sum(l2)<min_p:
+			min_p=sum(l2)
+			u_l=l2
+m_d_r=d_r
+m_u_l=u_l
 
-# ## 截取图片中表格部分，被裁剪图片包括 1)bitwise_and, 2)merge, 3)raw
-# padding=5
-# x0=max(m_u_l[0]-padding, 0)
-# x1=min(m_d_r[0]+padding, raw.shape[1])
-# y0=max(m_u_l[1]-padding, 0)
-# y1=min(m_d_r[1]+padding, raw.shape[0])
+## 截取图片中表格部分
+padding=0  # =5
+x0=max(m_u_l[0]-padding, 0)
+x1=min(m_d_r[0]+padding, raw.shape[1])
+y0=max(m_u_l[1]-padding, 0)
+y1=min(m_d_r[1]+padding, raw.shape[0])
 
+
+print(len(contours[0]))
+# cv2.drawContours(img,contours,-1,(0,255,0),5) 
+# cv2.circle(img,(x0,y0),2,(0,0,255))
+# cv2.circle(img,(x1,y1),2,(0,0,255))
+cv2.imwrite(respath+"5_contourspt.jpg", img)
+
+## 被裁剪图片包括 1)bitwise_and, 2)merge, 3)raw
 # bitwise_and_crop = bitwise_and.copy()
-#bitwise_and_crop = bitwise_and[y0:y1,x0:x1]
-#raw = raw[y0:y1,x0:x1]
-#merge = merge[y0:y1,x0:x1]
-#cv2.imwrite(respath+"5_裁剪融合图.jpg", merge)
+# bitwise_and_crop = bitwise_and[y0:y1,x0:x1]
+# raw = raw[y0:y1,x0:x1]
+# merge = merge[y0:y1,x0:x1]
+# cv2.imwrite(respath+"5_裁剪融合图.jpg", merge)
 
 
 # # 两张图片进行减法运算，去掉表格框线
@@ -125,17 +144,17 @@ x_point_arr = []
 i = 0
 sort_x_point = np.sort(xs)
 for i in range(len(sort_x_point) - 1):
-    if sort_x_point[i + 1] - sort_x_point[i] > 3:
-        x_point_arr.append(sort_x_point[i])
-    i = i + 1
+	if sort_x_point[i + 1] - sort_x_point[i] > 3:
+		x_point_arr.append(sort_x_point[i])
+	i = i + 1
 x_point_arr.append(sort_x_point[i])  # 要将最后一个点加入
 
 i = 0
 sort_y_point = np.sort(ys)
 for i in range(len(sort_y_point) - 1):
-    if sort_y_point[i + 1] - sort_y_point[i] > 3:
-        y_point_arr.append(sort_y_point[i])
-    i = i + 1
+	if sort_y_point[i + 1] - sort_y_point[i] > 3:
+		y_point_arr.append(sort_y_point[i])
+	i = i + 1
 y_point_arr.append(sort_y_point[i])
 print("sorted coor:")
 print(len(sort_x_point),len(sort_y_point))
@@ -207,11 +226,11 @@ for i in range(len(lt_list_x)):
 
 for i in range(len(lt_list_x)):
 	for j in range(len(lt_list_y)):
-        ## p点格式为(y,x)。假设 左上角 lt(y1,x1), 右下角 rd(y2,x2) ==> 左下角 p1(y2,x1), 右上角 p3(y1,x2)
+		## p点格式为(y,x)。假设 左上角 lt(y1,x1), 右下角 rd(y2,x2) ==> 左下角 p1(y2,x1), 右上角 p3(y1,x2)
 		p1 = [d['cell_{}_{}'.format(i,j)].rd[1], d['cell_{}_{}'.format(i,j)].lt[0]]  #左下点 
 		p2 = [d['cell_{}_{}'.format(i,j)].rd[1], d['cell_{}_{}'.format(i,j)].rd[0]]  #右下点 
 		p3 = [d['cell_{}_{}'.format(i,j)].lt[1], d['cell_{}_{}'.format(i,j)].rd[0]]  #右上点
-        ## 查看两点之间是否连接，确定单元格归属
+		## 查看两点之间是否连接，确定单元格归属
 		if not islianjie(p1,p2,merge):
 			d['cell_{}_{}'.format(i,j+1)].belong = d['cell_{}_{}'.format(i,j)].belong
 		if not islianjie(p2,p3,merge):
@@ -245,19 +264,19 @@ for key in crop_list.keys():
 	
 
 merge_format = workbook.add_format({
-    'bold':     True,
-    'border':   1,
-    'align':    'left',#水平居中
-    'valign':   'vcenter',#垂直居中
-    #'fg_color': '#D7E4BC',#颜色填充
+	'bold':     True,
+	'border':   1,
+	'align':    'left',#水平居中
+	'valign':   'vcenter',#垂直居中
+	#'fg_color': '#D7E4BC',#颜色填充
 })
 
 header_format = workbook.add_format({
-    'bold':     True,
-    'border':   1,
-    'align':    'center',#水平居中
-    'valign':   'vcenter',#垂直居中
-    #'fg_color': 'blue',#颜色填充
+	'bold':     True,
+	'border':   1,
+	'align':    'center',#水平居中
+	'valign':   'vcenter',#垂直居中
+	#'fg_color': 'blue',#颜色填充
 })
 
 def is_inside(cell, box):
@@ -327,7 +346,7 @@ for key in crop_list.keys():
 			#print(rd_col)
 	## 竖直方向
 	for i in range(len(h_list)+1):
-    	# 左上角
+		# 左上角
 		if lt_dist2ori[1]==sum(h_list[:i]):
 			lt_row=i+2
 			#print(lt_row)
