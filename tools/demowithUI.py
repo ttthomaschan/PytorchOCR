@@ -123,16 +123,17 @@ class TabRecognition:
 	函数 islianjie（） 用于判断两点之间是否有连接。原理：两点之间 取多条 垂直的 横截线段，如果有像素值为0的，可以判断这两点是断开的。
 	'''
 	def islianjie(self,p1,p2,img): # 坐标p的格式是先y轴后x轴
+		offset = 10 # 间隔距离半径
 		if p1[0]==p2[0]:   # y坐标相同，在同一横线
 			for i in range(min(p1[1],p2[1]),max(p1[1],p2[1])+1):
-				if sum( [ img[j,i] for j in range( max(p1[0]-5, 0), min(p1[0]+5, img.shape[0]) ) ] )==0: # img mask 格式也是先y后x
+				if sum( [ img[j,i] for j in range( max(p1[0]-offset, 0), min(p1[0]+offset, img.shape[0]) ) ] )==0: # img mask 格式也是先y后x
 					return False
 			return True
 
 		elif p1[1]==p2[1]:  # x坐标相同，在同一竖线
 			tmpsum = 0
 			for i in range(min(p1[0],p2[0]), max(p1[0],p2[0])+1):   # y轴变化范围 
-				if sum( [img[i,j] for j in range(max(p1[1]-5,0), min(p1[1]+5,img.shape[1])) ] ) == 0:   # x轴变化范围
+				if sum( [img[i,j] for j in range(max(p1[1]-offset,0), min(p1[1]+offset,img.shape[1])) ] ) == 0:   # x轴变化范围
 					return False
 			return True
 
@@ -450,10 +451,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		txt_f.close()
 		
 		'''Recognition and Generation of table'''
-		# tab_rec = TabRecognition(img_bak)
-		# crop_list,height_list, width_list= tab_rec.detnrec()
-		# self.resultname = res_name + '.xlsx'
-		# generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
+		tab_rec = TabRecognition(img_bak)
+		crop_list,height_list, width_list= tab_rec.detnrec()
+		self.resultname = res_name + '.xlsx'
+		generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
 		return box_list, self.rec_cont
 
 	def detResult_clicked(self):

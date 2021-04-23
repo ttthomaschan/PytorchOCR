@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 import math
 import xlwt
-src='/home/elimen/Data/dbnet_pytorch/test_images/Red_thres.jpg'
-respath='/home/elimen/Data/dbnet_pytorch/test_results_cell/'
-img_name='Red_thres'
+src='/home/elimen/Data/dbnet_pytorch/test_images/rotated02.jpg'
+respath='/home/elimen/Data/dbnet_pytorch/test_results/tableExtration/'
+img_name='rotated02'
 
 '''
 tmp operation:
@@ -76,41 +76,41 @@ keypoint: detect contours
 '''
 关键点：1. findcontours（）的应用， 定位每个cell。输出为 ys，xs
 '''
-image, contours, hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-area=[]
-for k in range(len(contours)):
-	area.append(cv2.contourArea(contours[k]))
-max_idx = np.argmax(np.array(area))
-m_d_r=[]
-m_u_l=[]
-max_p=0
-min_p=1e6
-img = raw
-for  l1 in contours[max_idx]:
-	for l2 in l1:
-		cv2.circle(img,(l2[0],l2[1]),2,(0,0,255))
-		if sum(l2)>max_p:
-			max_p=sum(l2)
-			d_r=l2
-		if sum(l2)<min_p:
-			min_p=sum(l2)
-			u_l=l2
-m_d_r=d_r
-m_u_l=u_l
+# image, contours, hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# area=[]
+# for k in range(len(contours)):
+# 	area.append(cv2.contourArea(contours[k]))
+# max_idx = np.argmax(np.array(area))
+# m_d_r=[]
+# m_u_l=[]
+# max_p=0
+# min_p=1e6
+# img = raw
+# for  l1 in contours[max_idx]:
+# 	for l2 in l1:
+# 		cv2.circle(img,(l2[0],l2[1]),2,(0,0,255))
+# 		if sum(l2)>max_p:
+# 			max_p=sum(l2)
+# 			d_r=l2
+# 		if sum(l2)<min_p:
+# 			min_p=sum(l2)
+# 			u_l=l2
+# m_d_r=d_r
+# m_u_l=u_l
 
-## 截取图片中表格部分
-padding=0  # =5
-x0=max(m_u_l[0]-padding, 0)
-x1=min(m_d_r[0]+padding, raw.shape[1])
-y0=max(m_u_l[1]-padding, 0)
-y1=min(m_d_r[1]+padding, raw.shape[0])
+# ## 截取图片中表格部分
+# padding=0  # =5
+# x0=max(m_u_l[0]-padding, 0)
+# x1=min(m_d_r[0]+padding, raw.shape[1])
+# y0=max(m_u_l[1]-padding, 0)
+# y1=min(m_d_r[1]+padding, raw.shape[0])
 
 
-print(len(contours[0]))
+# print(len(contours[0]))
 # cv2.drawContours(img,contours,-1,(0,255,0),5) 
 # cv2.circle(img,(x0,y0),2,(0,0,255))
 # cv2.circle(img,(x1,y1),2,(0,0,255))
-cv2.imwrite(respath+"5_contourspt.jpg", img)
+# cv2.imwrite(respath+"5_contourspt.jpg", img)
 
 ## 被裁剪图片包括 1)bitwise_and, 2)merge, 3)raw
 # bitwise_and_crop = bitwise_and.copy()
@@ -133,6 +133,7 @@ cv2.imwrite(respath+"5_contourspt.jpg", img)
 # 将交点标识提取出来，存放在ys，xs
 ys, xs = np.where(bitwise_and > 0)
 
+
 '''
 关键点：2. 利用相邻位置信息，过滤重复直线。输出为： 
 '''
@@ -141,15 +142,18 @@ y_point_arr = []
 x_point_arr = []
 # 通过排序，排除掉相近的像素点，只取相近值的最后一点
 # 这个3就是两个像素点的距离，不是固定的，根据不同的图片会有调整，基本上为单元格表格的高度（y坐标跳变）和长度（x坐标跳变）
-i = 0
 sort_x_point = np.sort(xs)
+
+tmpIndex = 0
 for i in range(len(sort_x_point) - 1):
 	if sort_x_point[i + 1] - sort_x_point[i] > 3:
-		x_point_arr.append(sort_x_point[i])
+		midIndex = (tmpIndex + i) // 2
+		x_point_arr.append(sort_x_point[midIndex])
+		tmpIndex = i + 1
 	i = i + 1
 x_point_arr.append(sort_x_point[i])  # 要将最后一个点加入
+print(x_point_arr)
 
-i = 0
 sort_y_point = np.sort(ys)
 for i in range(len(sort_y_point) - 1):
 	if sort_y_point[i + 1] - sort_y_point[i] > 3:
@@ -173,7 +177,7 @@ w_list=[x_point_arr[i+1]-x_point_arr[i] for i in range(len(x_point_arr)-1)]
 关键点：2. 使用xlsxwriter库，编辑生成相应的Excel格式
 '''
 import xlsxwriter
-workbook = xlsxwriter.Workbook('/home/elimen/Data/dbnet_pytorch/test_results_cell/mt03.xlsx')     # 创建新的工作簿
+workbook = xlsxwriter.Workbook('{}{}.xlsx'.format(respath,img_name))     # 创建新的工作簿
 worksheet = workbook.add_worksheet()   # 添加新的工作表
 
 # 先按行列数设置单元格，不管单元格合并格式
@@ -189,16 +193,26 @@ for j in range(len(h_list)):
 函数 islianjie（） 用于判断两点之间是否有连接。原理：两点之间 取多条 垂直的 横截线段，如果有像素值为0的，可以判断这两点是断开的。
 '''
 def islianjie(p1,p2,img): # 坐标p的格式是先y轴后x轴
+	offset = 10 # 
 	if p1[0]==p2[0]:   # y坐标相同，在同一横线
 		for i in range(min(p1[1],p2[1]),max(p1[1],p2[1])+1):
-			if sum( [ img[j,i] for j in range( max(p1[0]-5, 0), min(p1[0]+5, img.shape[0]) ) ] )==0: # img mask 格式也是先y后x
+			if sum( [ img[j,i] for j in range( max(p1[0]-offset, 0), min(p1[0]+offset, img.shape[0]) ) ] )==0: # img mask 格式也是先y后x
+				print("不连通横线： x={},y={}-{}".format(i,max(p1[1]-offset,0),min(p1[1]+offset,img.shape[1])))
+				tmpImg = raw
+				cv2.circle(tmpImg,(p1[1],p1[0]),2,(0,0,255))
+				cv2.circle(tmpImg,(p2[1],p2[0]),2,(0,0,255))
+				cv2.imwrite(respath+"7_checklianjie.jpg", tmpImg)
 				return False
 		return True
 
 	elif p1[1]==p2[1]:  # x坐标相同，在同一竖线
-		tmpsum = 0
 		for i in range(min(p1[0],p2[0]), max(p1[0],p2[0])+1):   # y轴变化范围 
-			if sum( [img[i,j] for j in range(max(p1[1]-5,0), min(p1[1]+5,img.shape[1])) ] ) == 0:   # x轴变化范围
+			if sum( [img[i,j] for j in range(max(p1[1]-offset,0), min(p1[1]+offset,img.shape[1])) ] ) == 0:   # x轴变化范围
+				print("不连通竖线： y={},x={}-{}".format(i,max(p1[1]-offset,0),min(p1[1]+offset,img.shape[1])))
+				tmpImg = raw
+				cv2.circle(tmpImg,(p1[1],p1[0]),2,(0,0,255))
+				cv2.circle(tmpImg,(p2[1],p2[0]),2,(0,0,255))
+				cv2.imwrite(respath+"7_checklianjie.jpg", tmpImg)
 				return False
 		return True
 
@@ -224,17 +238,24 @@ for i in range(len(lt_list_x)):
 	for j in range(len(lt_list_y)):
 		d['cell_{}_{}'.format(i,j)] = cell( [lt_list_x[i],lt_list_y[j]], [rd_list_x[i],rd_list_y[j]], [lt_list_x[i],lt_list_y[j]])
 
+cv2.imwrite(respath+"6_checkmerge.jpg", merge)
+checkImg = cv2.cvtColor(merge,cv2.COLOR_GRAY2BGR)
 for i in range(len(lt_list_x)):
 	for j in range(len(lt_list_y)):
 		## p点格式为(y,x)。假设 左上角 lt(y1,x1), 右下角 rd(y2,x2) ==> 左下角 p1(y2,x1), 右上角 p3(y1,x2)
 		p1 = [d['cell_{}_{}'.format(i,j)].rd[1], d['cell_{}_{}'.format(i,j)].lt[0]]  #左下点 
 		p2 = [d['cell_{}_{}'.format(i,j)].rd[1], d['cell_{}_{}'.format(i,j)].rd[0]]  #右下点 
 		p3 = [d['cell_{}_{}'.format(i,j)].lt[1], d['cell_{}_{}'.format(i,j)].rd[0]]  #右上点
+		
+		cv2.circle(checkImg,(p1[1],p1[0]),2,(0,0,255))
+		cv2.circle(checkImg,(p2[1],p2[0]),2,(0,0,255))
+		cv2.circle(checkImg,(p3[1],p3[0]),2,(0,0,255))
+		cv2.imwrite(respath+"7_checkcorner.jpg", checkImg)
 		## 查看两点之间是否连接，确定单元格归属
 		if not islianjie(p1,p2,merge):
 			d['cell_{}_{}'.format(i,j+1)].belong = d['cell_{}_{}'.format(i,j)].belong
 		if not islianjie(p2,p3,merge):
-			d['cell_{}_{}'.format(i+1,j)].belong=d['cell_{}_{}'.format(i,j)].belong
+			d['cell_{}_{}'.format(i+1,j)].belong = d['cell_{}_{}'.format(i,j)].belong
 
 crop_list={}
 for i in range(len(lt_list_x)):
