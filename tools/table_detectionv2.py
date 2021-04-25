@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import xlwt
-src='/home/elimen/Data/dbnet_pytorch/test_images/rotated02.jpg'
+src='/home/elimen/Data/dbnet_pytorch/test_images/mt03.png'
 respath='/home/elimen/Data/dbnet_pytorch/test_results/tableExtration/'
 img_name='rotated02'
 
@@ -10,28 +10,31 @@ img_name='rotated02'
 tmp operation:
 Read txt lines for bbox location.
 '''
-# detnrec_file = open(respath + img_name + '_result.txt', 'r')
-# detnrec_lines = detnrec_file.readlines()
-# bboxes_loc = []
-# rec_content = []
-# for line in detnrec_lines:
-# 	loc, rec = line.split(']')
-# 	loc = loc.replace('[','')
-# 	loc = loc.replace(' ','')
-# 	x1 = int(loc.split(',')[0])
-# 	y1 = int(loc.split(',')[1])
-# 	x2 = int(loc.split(',')[2])
-# 	y2 = int(loc.split(',')[3])
-# 	bbox = [x1,y1,x2,y2]
-# 	bboxes_loc.append(bbox)
-# 	rec_content.append(rec)
-# print(bboxes_loc)
+detnrec_file = open(respath + img_name + '_result.txt', 'r')
+detnrec_lines = detnrec_file.readlines()
+bboxes_loc = []
+rec_content = []
+for line in detnrec_lines:
+	loc, rec = line.split(']')
+	loc = loc.replace('[','')
+	loc = loc.replace(' ','')
+	x1 = int(loc.split(',')[0])
+	y1 = int(loc.split(',')[1])
+	x2 = int(loc.split(',')[2])
+	y2 = int(loc.split(',')[3])
+	bbox = [x1,y1,x2,y2]
+	bboxes_loc.append(bbox)
+	rec_content.append(rec)
+print(bboxes_loc)
 
 raw = cv2.imread(src, 1)
 # 灰度图片
 gray = cv2.cvtColor(raw, cv2.COLOR_BGR2GRAY)
 binary = cv2.adaptiveThreshold(~gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, -5)
-
+cv2.imwrite(respath+"0_灰度图.jpg", gray)
+'''
+关键点：1. 利用形态学原理，巧妙设计腐蚀膨胀的核心，横竖线分开识别
+'''
 rows, cols = binary.shape
 scale2 = 15
 scale = 20
@@ -64,17 +67,9 @@ merge = cv2.add(dilated_col, dilated_row)
 ret,binary = cv2.threshold(merge, 127, 255, cv2.THRESH_BINARY)
 cv2.imwrite(respath+"4_横竖交点阈值化.jpg", binary)
 
-'''
-keypoint: detect contours
-'''
-# image,contours,hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-# print(len(contours))
-# img = raw
-# cv2.drawContours(img,contours,0,(0,255,0),5) 
-# cv2.imwrite(respath+"5_contours_0.jpg", img)
 
 '''
-关键点：1. findcontours（）的应用， 定位每个cell。输出为 ys，xs
+关键点：1. findcontours（）的应用， 定位整个表格位置，裁剪。
 '''
 # image, contours, hierarchy = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 # area=[]
@@ -135,7 +130,7 @@ ys, xs = np.where(bitwise_and > 0)
 
 
 '''
-关键点：2. 利用相邻位置信息，过滤重复直线。输出为： 
+关键点：2. 利用相邻位置信息，过滤重复角点。输出为：1)角点; 2)单元格长宽 
 '''
 # 横纵坐标数组
 y_point_arr = []
@@ -143,34 +138,29 @@ x_point_arr = []
 # 通过排序，排除掉相近的像素点，只取相近值的最后一点
 # 这个3就是两个像素点的距离，不是固定的，根据不同的图片会有调整，基本上为单元格表格的高度（y坐标跳变）和长度（x坐标跳变）
 sort_x_point = np.sort(xs)
-
 tmpIndex = 0
 for i in range(len(sort_x_point) - 1):
 	if sort_x_point[i + 1] - sort_x_point[i] > 3:
 		midIndex = (tmpIndex + i) // 2
-		x_point_arr.append(sort_x_point[midIndex])
+		x_point_arr.append(sort_x_point[midIndex])   # 同一个角点，选择中位数点加入
 		tmpIndex = i + 1
 	i = i + 1
 x_point_arr.append(sort_x_point[i])  # 要将最后一个点加入
 print(x_point_arr)
 
 sort_y_point = np.sort(ys)
+tmpIndex = 0
 for i in range(len(sort_y_point) - 1):
 	if sort_y_point[i + 1] - sort_y_point[i] > 3:
-		y_point_arr.append(sort_y_point[i])
+		midIndex = (tmpIndex + i) // 2
+		y_point_arr.append(sort_y_point[midIndex])
+		tmpIndex = i + 1
 	i = i + 1
-y_point_arr.append(sort_y_point[i])
-print("sorted coor:")
-print(len(sort_x_point),len(sort_y_point))
-print("filtered coor:")
-print(len(x_point_arr),len(y_point_arr))
+y_point_arr.append(sort_y_point[i])  # 要将最后一个点加入
 
 # height and width list
 h_list=[y_point_arr[i+1]-y_point_arr[i] for i in range(len(y_point_arr)-1)]
 w_list=[x_point_arr[i+1]-x_point_arr[i] for i in range(len(x_point_arr)-1)]
-# print("length message:")
-# print(h_list)
-# print(w_list)
 
 
 '''
@@ -186,7 +176,6 @@ for i in range(len(w_list)):
 	worksheet.set_column('{}:{}'.format(col_alpha[i],col_alpha[i]),w_list[i]/6) 
 for j in range(len(h_list)):
 	worksheet.set_row(j+1,h_list[j])
-
 
 
 '''
@@ -350,8 +339,6 @@ for key in crop_list.keys():
 		if is_inside(cell,box):
 			content.append(rec_content[i].split('\n')[0])
 
-			
-		
 	lt_dist2ori = [lt[0]-zlt[0],lt[1]-zlt[1]]
 	rd_dist2ori = [rd[0]-zlt[0],rd[1]-zlt[1]]
 
@@ -386,6 +373,5 @@ for key in crop_list.keys():
 		worksheet.write('{}{}'.format(lt_col,lt_row),'{}'.format(contents),merge_format)   # 写入内容
 	else:
 		worksheet.merge_range('{}{}:{}{}'.format(lt_col,lt_row,rd_col,rd_row),'{}'.format(contents),merge_format)  # 合并单元格
-
 
 workbook.close()

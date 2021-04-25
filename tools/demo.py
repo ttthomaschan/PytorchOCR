@@ -36,7 +36,6 @@ class cell:
 		self.rd=rd
 		self.belong=belong   # 也是以角点来表示，一个单元格归属于它的左上角，如果归属同一个点，说明是同一个单元格！
 
-
 class DetInfer:
 	def __init__(self, model_path):
 		ckpt = torch.load(model_path, map_location='cpu')
@@ -176,27 +175,29 @@ class TabRecognition:
 		# 交点的横纵坐标数组
 		y_point_arr = []
 		x_point_arr = []
-		# 通过排序，排除掉相近的像素点，只取相近值的最后一点
+		# 通过排序，排除掉相近的像素点，只取相近值的中位数点
 		# 这个3就是两个像素点的距离，不是固定的，根据不同的图片会有调整，基本上为单元格表格的高度（y坐标跳变）和长度（x坐标跳变）
 		i = 0
 		sort_x_point = np.sort(xs)
+		tmpIndex = 0
 		for i in range(len(sort_x_point) - 1):
 			if sort_x_point[i + 1] - sort_x_point[i] > 3:
-				x_point_arr.append(sort_x_point[i])
+				midIndex = (tmpIndex + i) // 2
+				x_point_arr.append(sort_x_point[midIndex])
+				tmpIndex = i + 1
 			i = i + 1
 		x_point_arr.append(sort_x_point[i])  # 要将最后一个点加入
 
 		i = 0
 		sort_y_point = np.sort(ys)
+		tmpIndex = 0
 		for i in range(len(sort_y_point) - 1):
 			if sort_y_point[i + 1] - sort_y_point[i] > 3:
-				y_point_arr.append(sort_y_point[i])
+				midIndex = (tmpIndex + i) // 2
+				y_point_arr.append(sort_y_point[midIndex])
+				tmpIndex = i + 1
 			i = i + 1
 		y_point_arr.append(sort_y_point[i])
-		# print("sorted coor:")
-		# print(len(sort_x_point),len(sort_y_point))
-		# print("filtered coor:")
-		# print(len(x_point_arr),len(y_point_arr))
 
 		self.y_crossingpoint_arr = y_point_arr
 		self.x_crossingpoint_arr = x_point_arr
