@@ -2,6 +2,16 @@ import cv2
 import numpy as np
 import math
 import xlsxwriter
+import os
+import pandas as pd
+from addict import Dict
+
+# 构建一个类，作用类似于结构体
+class cell:
+	def __init__(self,lt,rd,belong):
+		self.lt=lt
+		self.rd=rd
+		self.belong=belong   # 也是以角点来表示，一个单元格归属于它的左上角，如果归属同一个点，说明是同一个单元格！
 
 class TabRecognition:
 	def __init__(self,image,logPath):
@@ -388,12 +398,6 @@ class tableExtration():
 		else:
 			return False
 
-	# 构建一个类，作用类似于结构体
-	class cell:
-		def __init__(self,lt,rd,belong):
-			self.lt=lt
-			self.rd=rd
-			self.belong=belong   # 也是以角点来表示，一个单元格归属于它的左上角，如果归属同一个点，说明是同一个单元格！
 
 	# 通过角点检查文本框是否在单元格内
 	def is_inside(self, cell, box):

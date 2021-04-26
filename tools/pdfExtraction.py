@@ -1,12 +1,15 @@
 import os
 import fitz
+import numpy as np
+import cv2
+import time
 
-def pdf2img(pdfPath,page,zoom_x=10,zoom_y=10,logMode=False):
-
+def pdf2img(pdfPath,page=1,zoom_x=2,zoom_y=2,logMode=False):
+    
     pdf = fitz.open(pdfPath)
     rotation_angle = 0
     pages = pdf.pageCount
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     if page in range(1,pages+1):
         pg = pdf[page - 1]
         trans = fitz.Matrix(zoom_x, zoom_y).preRotate(rotation_angle)
@@ -24,6 +27,10 @@ def pdf2img(pdfPath,page,zoom_x=10,zoom_y=10,logMode=False):
     return img_cv
 
 
-if "__main__" == "__name__"
-    pdfPath = '/home/elimen/Data/dbnet_pytorch/test_pdf/zd.pdf'
-    img = pdf2img(pdfPath,1）
+if __name__ == "__main__":
+    pdfPath = '/home/elimen/Data/dbnet_pytorch/test_images/mt52.pdf'
+    print("start")
+    start = time.time()
+    img = pdf2img(pdfPath,1)
+    print(time.time()- start)
+    print("end")
