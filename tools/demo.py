@@ -40,8 +40,8 @@ class DetInfer:
 			state_dict[k.replace('module.', '')] = v
 		self.model.load_state_dict(state_dict)
 
-		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-		#self.device = 'cpu'
+		#self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+		self.device = 'cpu'
 		self.model.to(self.device)
 		self.model.eval()
 		self.resize = ResizeFixedSize(736, False)
@@ -79,8 +79,8 @@ class RecInfer:
 			state_dict[k.replace('module.', '')] = v
 		self.model.load_state_dict(state_dict)
 
-		self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-		# self.device = 'cpu'
+		#self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+		self.device = 'cpu'
 		self.model.to(self.device)
 		self.model.eval()
 
@@ -103,12 +103,9 @@ class RecInfer:
 if __name__ == '__main__':
 	
 	parser = argparse.ArgumentParser(description='PytorchOCR infer')
-	# parser.add_argument('--modeldet_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_det_server_db_res18.pth')
-	# parser.add_argument('--modelrec_path', type=str, help='rec model path',default='/home/junlin/Git/github/dbnet_pytorch/checkpoints/ch_rec_server_crnn_res34.pth')
-	# parser.add_argument('--file_path', type=str, help='img path for predict',default='/home/junlin/Git/github/dbnet_pytorch/test_images/mt04.png')
 	parser.add_argument('--modeldet_path', type=str, help='det model path',default='../checkpoints/ch_det_server_db_res18.pth')
 	parser.add_argument('--modelrec_path', type=str, help='rec model path',default='../checkpoints/ch_rec_moblie_crnn_mbv3.pth')  # ch_rec_server_crnn_res34.pth  # ch_rec_moblie_crnn_mbv3.pth
-	parser.add_argument('--file_path', type=str, help='img path for predict',default='../test_images/mt52.pdf')
+	parser.add_argument('--file_path', type=str, help='img path for predict',default='../test_images/mt03.png')
 	args = parser.parse_args()
 	
 	start = time.time()
@@ -121,21 +118,19 @@ if __name__ == '__main__':
 		img = pdfExtraction.pdf2img(args.file_path)
 	else:
 		img = cv2.imread(args.file_path)
-	
 	img_bak = img.copy()
+
 	box_list, score_list = modeldet.predict(img, is_output_polygon=False)
-	
-	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-	img = draw_bbox(img, box_list)
 
-	#imageres_path = '/home/junlin/Git/github/dbnet_pytorch/test_results/'
 	imageres_path = '../test_results/'
-	res_name = args.file_path.split('/')[-1].split('.')[0]
-	cv2.imwrite(imageres_path + res_name + '_bbox.jpg',img)
+	res_name = args.file_path.split('/')[-1].split('.')[0]	
+	
+	# img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+	# img = draw_bbox(img, box_list)
+	# cv2.imwrite(imageres_path + res_name + '_bbox.jpg',img)
 
-	txt_file = os.path.join(imageres_path, res_name + '_result.txt')
-	txt_f = open(txt_file, 'w')
-
+	# txt_file = os.path.join(imageres_path, res_name + '_result.txt')
+	# txt_f = open(txt_file, 'w')
 
 	'''
 	output the bbox corner and text recognition result
@@ -144,14 +139,13 @@ if __name__ == '__main__':
 	bbox_cornerlist = []
 	for i, box in enumerate(box_list):
 		pt0,pt1,pt2,pt3=box
-
 		imgout = img_bak[int(min(pt0[1],pt1[1]))-4 :int(max(pt2[1],pt3[1])) +4,int(min(pt0[0],pt3[0]))-4:int(max(pt1[0],pt2[0]))+4]
 		imgcroplist.append(imgout)
-		#cv2.imwrite(imageres_path+res_name +'_'+str(i)+'.jpg',imgout)
-
 		box_corner = [int(pt0[0]),int(pt0[1]),int(pt2[0]),int(pt2[1])]
 		bbox_cornerlist.append(box_corner)
 	bbox_cornerlist.reverse()
+	print("Detection complete, it took {:.3f}s".format(time.time() - start))
+	start = time.time()
 		
 	rec_cont = [] 
 	for i in range(len(imgcroplist)-1,-1,-1):
@@ -159,9 +153,11 @@ if __name__ == '__main__':
 		rec_res = digitCalibration.digitCalibration(out[0][0],2) 
 		rec_cont.append(rec_res) 
 
-		txt_f.write(str(bbox_cornerlist[i]))
-		txt_f.write(rec_res+ '\n')	
-	txt_f.close()
+	# 	txt_f.write(str(bbox_cornerlist[i]))
+	# 	txt_f.write(rec_res+ '\n')	
+	# txt_f.close()
+	print("Recognition complete, it took {:.3f}s".format(time.time() - start))
+	start = time.time()
 
 	tab_rec = tableRecognition.TabRecognition(img_bak,imageres_path)
 	crop_list,height_list, width_list= tab_rec.detnrec()
