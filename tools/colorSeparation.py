@@ -24,11 +24,18 @@ def colorSeparation(srcImg):
     
     return img_RedThresh, img_Merged
 
+###############################################################################
 if __name__ == "__main__":
     
-    img_name = "01"
-    srcImg = cv2.imread("/home/elimen/Data/Project/test_image_pdf/test_image/"+img_name+".jpg")
-    img_R, img_Merged = colorSeparation(srcImg)
-    path = "/home/elimen/Data/Project/test_image_pdf/test_image/color_split/"
-    cv2.imwrite(path + img_name + "_R.jpg",img_R)
-    cv2.imwrite(path + img_name + "_Merged.jpg",img_Merged)
+    import os
+    g = os.walk("/home/elimen/Data/Project/test_image_pdf/test_image/")
+    res_path = "/home/elimen/Data/Project/test_image_pdf/color_split/"
+    for path,dir_list,file_list in g:  
+        for file_name in file_list:  
+            imgfile = os.path.join(path, file_name)
+            srcImg = cv2.imread(imgfile)
+            img_R, img_Merged = colorSeparation(srcImg)
+            
+            # cv2.imwrite(res_path + file_name + "_R.jpg", img_R)
+            cv2.imwrite(res_path + file_name.split('.')[0] + "_Merged.jpg", img_Merged)
+

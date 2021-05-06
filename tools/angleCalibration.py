@@ -94,15 +94,20 @@ class CalculateBarycenter():
 #########################################################################3333
 
 if __name__ == "__main__":
-    imgPath = "/home/elimen/Data/dbnet_pytorch/test_images/rotated02.jpg"
-    logPath = "/home/elimen/Data/dbnet_pytorch/test_results/angleCalibration"
-    srcImg = cv2.imread(imgPath,1)
 
-    calRotImg = calibrateRotatedImage(srcImg)
-    angle, rotated_img = calRotImg()
-    calRotImg.check_horizontal_lines(logPath)
-    print(angle)
-    cv2.imwrite(logPath+"/calibratedImg.jpg", rotated_img)
+    import os
+    g = os.walk("/home/elimen/Data/Project/test_image_pdf/color_split/")
+    res_path = "/home/elimen/Data/Project/test_image_pdf/angle_rotate/"
+    for path,dir_list,file_list in g:  
+        for file_name in file_list:  
+            imgfile = os.path.join(path, file_name)
+            srcImg = cv2.imread(imgfile)
+            calRotImg = calibrateRotatedImage(srcImg)
+            angle, rotated_img = calRotImg()
+            
+            cv2.imwrite(res_path + file_name.split('.')[0] + "_Rotated.jpg", rotated_img)
+
+
 
 
 
