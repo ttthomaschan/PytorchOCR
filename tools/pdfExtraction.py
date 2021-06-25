@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+# @file name  : pdfExtraction.py
+# @author     : JLChen
+# @date       : 2021-04
+# @brief      : PDF文件转图像
+"""
+
 import os
 import fitz
 import numpy as np
@@ -20,8 +28,10 @@ def pdf2img(pdfPath,page=1,zoom_x=2,zoom_y=2,logMode=False):
         ## decode to np.uint8
         img_array = np.frombuffer(getpngdata, dtype=np.uint8)
         img_cv = cv2.imdecode(img_array, cv2.IMREAD_ANYCOLOR)
+        img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+
     else:
-        '''返回错误码'''
+        '''return error code'''
 
     pdf.close()
     return img_cv

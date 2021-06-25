@@ -420,7 +420,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.srcImg = cv2.cvtColor(self.srcImg, cv2.COLOR_BGR2RGB)
 		self.boxImg = draw_bbox(self.srcImg, box_list)
 
-		res_name = self.imgPath.split('/')[-1].split('.')[0] #'mt03_bbox.jpg'
+		res_name = self.imgPath.split('/')[-1].split('.')[1] #'mt03_bbox.jpg'
 		cv2.imwrite(self.resPath + res_name +'_bbox.jpg', self.boxImg)
 
 		## Recognition
@@ -451,10 +451,12 @@ class MainWindow(QtWidgets.QMainWindow):
 		txt_f.close()
 		
 		'''Recognition and Generation of table'''
-		tab_rec = TabRecognition(img_bak)
-		crop_list,height_list, width_list= tab_rec.detnrec()
-		self.resultname = res_name + '.xlsx'
-		generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
+		## Temporarily comment
+		# tab_rec = TabRecognition(img_bak)
+		# crop_list,height_list, width_list= tab_rec.detnrec()
+		# self.resultname = res_name + '.xlsx'
+		# generateExcelFile(self.resPath,self.resultname,bbox_cornerlist,self.rec_cont,crop_list,height_list,width_list)
+		
 		return box_list, self.rec_cont
 
 	def detResult_clicked(self):
